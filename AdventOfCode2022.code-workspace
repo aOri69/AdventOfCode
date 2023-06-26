@@ -1,0 +1,25 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"editor.inlayHints.enabled": "offUnlessPressed",
+		"editor.formatOnType": true,
+		"editor.rulers": [
+			132
+		],
+		"lldb.launch.preRunCommands": [
+			"script lldb.debugger.HandleCommand('settings set target.source-map /rustc/{} \"{}/lib/rustlib/src/rust\"'.format(os.popen('rustc --version --verbose').read().split('commit-hash: ')[1].split('\\n')[0].strip(), os.popen('rustc --print sysroot').readline().strip()))"
+		],
+		"[rust]": {
+			"editor.defaultFormatter": "rust-lang.rust-analyzer",
+			"editor.formatOnSave": true
+		},
+		"rust-analyzer.check.command": "clippy",
+		"rust-analyzer.inlayHints.bindingModeHints.enable": true,
+		"rust-analyzer.inlayHints.closureCaptureHints.enable": true,
+		"rust-analyzer.inlayHints.maxLength": null,
+	}
+}
