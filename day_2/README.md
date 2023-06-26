@@ -1,4 +1,6 @@
-## \--- Day 2: Rock Paper Scissors ---
+# \--- Day 2: Rock Paper Scissors ---
+
+## \--- Part One ---
 
 The Elves begin to set up camp on the beach. To decide whose tent gets to be closest to the snack storage, a giant [Rock Paper Scissors](https://en.wikipedia.org/wiki/Rock_paper_scissors) tournament is already in progress.
 
@@ -14,7 +16,7 @@ Since you can't be sure if the Elf is trying to help you or trick you, you shoul
 
 For example, suppose you were given the following strategy guide:
 
-```
+```text
 A Y
 B X
 C Z
@@ -22,9 +24,9 @@ C Z
 
 This strategy guide predicts and recommends the following:
 
--   In the first round, your opponent will choose Rock (`A`), and you should choose Paper (`Y`). This ends in a win for you with a score of _8_ (2 because you chose Paper + 6 because you won).
--   In the second round, your opponent will choose Paper (`B`), and you should choose Rock (`X`). This ends in a loss for you with a score of _1_ (1 + 0).
--   The third round is a draw with both players choosing Scissors, giving you a score of 3 + 3 = _6_.
+- In the first round, your opponent will choose Rock (`A`), and you should choose Paper (`Y`). This ends in a win for you with a score of _8_ (2 because you chose Paper + 6 because you won).
+- In the second round, your opponent will choose Paper (`B`), and you should choose Rock (`X`). This ends in a loss for you with a score of _1_ (1 + 0).
+- The third round is a draw with both players choosing Scissors, giving you a score of 3 + 3 = _6_.
 
 In this example, if you were to follow the strategy guide, you would get a total score of `_15_` (8 + 1 + 6).
 
@@ -38,9 +40,9 @@ The Elf finishes helping with the tent and sneaks back over to you. "Anyway, the
 
 The total score is still calculated in the same way, but now you need to figure out what shape to choose so the round ends as indicated. The example above now goes like this:
 
--   In the first round, your opponent will choose Rock (`A`), and you need the round to end in a draw (`Y`), so you also choose Rock. This gives you a score of 1 + 3 = _4_.
--   In the second round, your opponent will choose Paper (`B`), and you choose Rock so you lose (`X`) with a score of 1 + 0 = _1_.
--   In the third round, you will defeat your opponent's Scissors with Rock for a score of 1 + 6 = _7_.
+- In the first round, your opponent will choose Rock (`A`), and you need the round to end in a draw (`Y`), so you also choose Rock. This gives you a score of 1 + 3 = _4_.
+- In the second round, your opponent will choose Paper (`B`), and you choose Rock so you lose (`X`) with a score of 1 + 0 = _1_.
+- In the third round, you will defeat your opponent's Scissors with Rock for a score of 1 + 6 = _7_.
 
 Now that you're correctly decrypting the ultra top secret strategy guide, you would get a total score of `_12_`.
 

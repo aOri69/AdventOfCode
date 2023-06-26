@@ -1,4 +1,6 @@
-## \--- Day 1: Calorie Counting ---
+# \--- Day 1: Calorie Counting ---
+
+## \--- Part One ---
 
 Santa's reindeer typically eat regular reindeer food, but they need a lot of [magical energy](https://adventofcode.com/2018/day/25) to deliver presents on Christmas. For that, their favorite snack is a special type of _star_ fruit that only grows deep in the jungle. The Elves have brought you on their annual expedition to the grove where the fruit grows.
 
@@ -12,7 +14,7 @@ The Elves take turns writing down the number of Calories contained by the variou
 
 For example, suppose the Elves finish writing their items' Calories and end up with the following list:
 
-```
+```text
 1000
 2000
 3000
@@ -31,11 +33,11 @@ For example, suppose the Elves finish writing their items' Calories and end up w
 
 This list represents the Calories of the food carried by five Elves:
 
--   The first Elf is carrying food with `1000`, `2000`, and `3000` Calories, a total of `_6000_` Calories.
--   The second Elf is carrying one food item with `_4000_` Calories.
--   The third Elf is carrying food with `5000` and `6000` Calories, a total of `_11000_` Calories.
--   The fourth Elf is carrying food with `7000`, `8000`, and `9000` Calories, a total of `_24000_` Calories.
--   The fifth Elf is carrying one food item with `_10000_` Calories.
+- The first Elf is carrying food with `1000`, `2000`, and `3000` Calories, a total of `_6000_` Calories.
+- The second Elf is carrying one food item with `_4000_` Calories.
+- The third Elf is carrying food with `5000` and `6000` Calories, a total of `_11000_` Calories.
+- The fourth Elf is carrying food with `7000`, `8000`, and `9000` Calories, a total of `_24000_` Calories.
+- The fifth Elf is carrying one food item with `_10000_` Calories.
 
 In case the Elves get hungry and need extra snacks, they need to know which Elf to ask: they'd like to know how many Calories are being carried by the Elf carrying the _most_ Calories. In the example above, this is _`24000`_ (carried by the fourth Elf).
 

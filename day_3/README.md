@@ -1,4 +1,6 @@
-## \--- Day 3: Rucksack Reorganization ---
+# \--- Day 3: Rucksack Reorganization ---
+
+## \--- Part One ---
 
 One Elf has the important job of loading all of the [rucksacks](https://en.wikipedia.org/wiki/Rucksack) with supplies for the jungle journey. Unfortunately, that Elf didn't quite follow the packing instructions, and so a few items now need to be rearranged.
 
@@ -10,7 +12,7 @@ The list of items for each rucksack is given as characters all on a single line.
 
 For example, suppose you have the following list of contents from six rucksacks:
 
-```
+```text
 vJrwpWtwJgWrhcsFMMfFFhFp
 jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
 PmmdzqPrVvPwwTWBwg
@@ -19,17 +21,17 @@ ttgJtRGJQctTZtZT
 CrZsJsPPZsGzwwsLwLmpwMDw
 ```
 
--   The first rucksack contains the items `vJrwpWtwJgWrhcsFMMfFFhFp`, which means its first compartment contains the items `vJrwpWtwJgWr`, while the second compartment contains the items `hcsFMMfFFhFp`. The only item type that appears in both compartments is lowercase `_p_`.
--   The second rucksack's compartments contain `jqHRNqRjqzjGDLGL` and `rsFMfFZSrLrFZsSL`. The only item type that appears in both compartments is uppercase `_L_`.
--   The third rucksack's compartments contain `PmmdzqPrV` and `vPwwTWBwg`; the only common item type is uppercase `_P_`.
--   The fourth rucksack's compartments only share item type `_v_`.
--   The fifth rucksack's compartments only share item type `_t_`.
--   The sixth rucksack's compartments only share item type `_s_`.
+- The first rucksack contains the items `vJrwpWtwJgWrhcsFMMfFFhFp`, which means its first compartment contains the items `vJrwpWtwJgWr`, while the second compartment contains the items `hcsFMMfFFhFp`. The only item type that appears in both compartments is lowercase `_p_`.
+- The second rucksack's compartments contain `jqHRNqRjqzjGDLGL` and `rsFMfFZSrLrFZsSL`. The only item type that appears in both compartments is uppercase `_L_`.
+- The third rucksack's compartments contain `PmmdzqPrV` and `vPwwTWBwg`; the only common item type is uppercase `_P_`.
+- The fourth rucksack's compartments only share item type `_v_`.
+- The fifth rucksack's compartments only share item type `_t_`.
+- The sixth rucksack's compartments only share item type `_s_`.
 
 To help prioritize item rearrangement, every item type can be converted to a _priority_:
 
--   Lowercase item types `a` through `z` have priorities 1 through 26.
--   Uppercase item types `A` through `Z` have priorities 27 through 52.
+- Lowercase item types `a` through `z` have priorities 1 through 26.
+- Uppercase item types `A` through `Z` have priorities 27 through 52.
 
 In the above example, the priority of the item type that appears in both compartments of each rucksack is 16 (`p`), 38 (`L`), 42 (`P`), 22 (`v`), 20 (`t`), and 19 (`s`); the sum of these is `_157_`.
 
@@ -49,7 +51,7 @@ Additionally, nobody wrote down which item type corresponds to each group's badg
 
 Every set of three lines in your list corresponds to a single group, but each group can have a different badge item type. So, in the above example, the first group's rucksacks are the first three lines:
 
-```
+```text
 vJrwpWtwJgWrhcsFMMfFFhFp
 jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
 PmmdzqPrVvPwwTWBwg
@@ -57,7 +59,7 @@ PmmdzqPrVvPwwTWBwg
 
 And the second group's rucksacks are the next three lines:
 
-```
+```text
 wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
 ttgJtRGJQctTZtZT
 CrZsJsPPZsGzwwsLwLmpwMDw

@@ -1,4 +1,6 @@
-## \--- Day 5: Supply Stacks ---
+# \--- Day 5: Supply Stacks ---
+
+## \--- Part One ---
 
 The expedition can depart as soon as the final supplies have been unloaded from the ships. Supplies are stored in stacks of marked _crates_, but because the needed supplies are buried under many other crates, the crates need to be rearranged.
 
@@ -8,7 +10,7 @@ The Elves don't want to interrupt the crane operator during this delicate proced
 
 They do, however, have a drawing of the starting stacks of crates _and_ the rearrangement procedure (your puzzle input). For example:
 
-```
+```text
     [D]    
 [N] [C]    
 [Z] [M] [P]
@@ -24,7 +26,7 @@ In this example, there are three stacks of crates. Stack 1 contains two crates: 
 
 Then, the rearrangement procedure is given. In each step of the procedure, a quantity of crates is moved from one stack to a different stack. In the first step of the above rearrangement procedure, one crate is moved from stack 2 to stack 1, resulting in this configuration:
 
-```
+```text
 [D]        
 [N] [C]    
 [Z] [M] [P]
@@ -33,7 +35,7 @@ Then, the rearrangement procedure is given. In each step of the procedure, a qua
 
 In the second step, three crates are moved from stack 1 to stack 3. Crates are moved _one at a time_, so the first crate to be moved (`D`) ends up below the second and third crates:
 
-```
+```text
         [Z]
         [N]
     [C] [D]
@@ -43,7 +45,7 @@ In the second step, three crates are moved from stack 1 to stack 3. Crates are m
 
 Then, both crates are moved from stack 2 to stack 1. Again, because crates are moved _one at a time_, crate `C` ends up below crate `M`:
 
-```
+```text
         [Z]
         [N]
 [M]     [D]
@@ -53,7 +55,7 @@ Then, both crates are moved from stack 2 to stack 1. Again, because crates are m
 
 Finally, one crate is moved from stack 1 to stack 2:
 
-```
+```text
         [Z]
         [N]
         [D]
