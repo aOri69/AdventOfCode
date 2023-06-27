@@ -1,37 +1,40 @@
-use std::str::FromStr;
+use std::{fmt::Display, ops::Deref};
 
-use nom::{
-    bytes::complete::{tag, take},
-    combinator::{map, opt},
-    sequence::delimited,
-};
-
-#[derive(Debug)]
+#[derive(Clone, Copy)]
 pub struct Crate(char);
 
-impl FromStr for Crate {
-    type Err = &'static str;
+impl Deref for Crate {
+    type Target = char;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        todo!()
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
-#[derive(Debug, Default)]
-pub struct CrateStack {
-    container: Vec<Crate>,
+impl Display for Crate {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(format!("{}", self.0).as_str())
+    }
 }
-impl CrateStack {
+
+impl std::fmt::Debug for Crate {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(format!("{self}").as_str())
+    }
+}
+
+#[derive(Debug, Default, Clone)]
+pub struct Stack(Vec<Crate>);
+
+impl Stack {
     pub fn new() -> Self {
-        Self {
-            container: Vec::new(),
-        }
+        Self(Vec::new())
     }
     pub fn pop(&mut self) -> Option<Crate> {
-        self.container.pop()
+        self.0.pop()
     }
     pub fn push(&mut self, item: Crate) {
-        self.container.push(item)
+        self.0.push(item)
     }
 }
 
@@ -50,7 +53,16 @@ pub fn transpose<T>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
 }
 
 pub fn parse_into_crates(s: &str) -> Vec<Option<Crate>> {
-    let first_char = |s: &str| Crate(s.chars().next().unwrap());
-    let mut parser = delimited(tag("["), take(1_usize), tag("]"));
-    let result = map(parser, first_char)(s);
+    s.chars()
+        .collect::<Vec<_>>()
+        .chunks(4)
+        .map(|chunk_crate| {
+            // println!("chunk_crate: {chunk_crate:?}");
+            match chunk_crate.get(1) {
+                Some(' ') => None,
+                Some(c) => Some(Crate(*c)),
+                None => panic!("Don't know how this could have happen"),
+            }
+        })
+        .collect()
 }

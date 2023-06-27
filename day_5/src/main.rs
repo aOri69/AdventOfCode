@@ -1,4 +1,4 @@
-use supply_stacks::CrateStack;
+use supply_stacks::{parse_into_crates, Stack};
 
 fn main() {
     let input_lines = include_str!("../input_test.txt").lines();
@@ -11,30 +11,36 @@ fn main() {
     dbg!(&stacks_str);
 
     //Determine number of stacks and create a vec of stacks
-    let stacks: Vec<CrateStack> = Vec::with_capacity(
-        stacks_str
-            .last()
-            .expect("Expected to have the enumeration of stacks")
-            .len()
-            / 3,
-    );
+    let size = (stacks_str
+        .last()
+        .expect("Expected to have the enumeration of stacks")
+        .len()
+        + 1) // Strange way to make the proper number of stacks....
+        / 4;
+    // And create a vec of stacks with determined size
+    let mut stacks = vec![Stack::new(); size];
+
+    // To use with the second copy of iterator
+    // to start with the commands line
     let len = stacks_str.len() + 1;
 
     for stacks_line in stacks_str.into_iter().rev().skip(1) {
-        dbg!(stacks_line);
-        let r: Vec<_> = stacks_line
-            .split_ascii_whitespace()
+        // println!("stacks_line: {stacks_line:?}");
+        let crates = parse_into_crates(stacks_line);
+        // println!("parsed: {crates:?}");
+        crates
+            .into_iter()
             .enumerate()
-            .map(|(idx, crt)| match crt.len() {
-                3 => Some(crt),
-                _ => None,
-            })
-            .collect();
-        dbg!(r);
+            // idx needed to chose the proper stack to push
+            .filter(|(_idx, crt)| crt.is_some())
+            .for_each(|(idx, crt)| {
+                stacks.get_mut(idx).unwrap().push(crt.unwrap());
+            });
     }
 
-    dbg!(stacks);
+    println!("{stacks:?}");
 
+    // Using the original iterator shifted by Crates lines + one empty \n line
     let commands = input_lines.skip(len).collect::<Vec<_>>();
     dbg!(commands);
 }
