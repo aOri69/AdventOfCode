@@ -1,6 +1,8 @@
 use std::str::FromStr;
 
-use supply_stacks::{move_crate, parse_into_crates, CommandError, MoveCommand, Stack};
+use supply_stacks::{
+    move_crate, move_crate_and_retain_order, parse_into_crates, CommandError, MoveCommand, Stack,
+};
 
 fn main() {
     let input_lines = include_str!("../input.txt").lines();
@@ -51,8 +53,31 @@ fn main() {
         .expect("expected to parse all commands");
     // println!("{commands:?}");
 
+    println!("-------------------PART 1-------------------");
+    part_1(stacks.clone(), commands.clone());
+    println!("-------------------PART 2-------------------");
+    part_2(stacks, commands);
+    println!("-------------------END----------------------");
+}
+
+fn part_1(mut stacks: Vec<Stack>, commands: Vec<MoveCommand>) {
     commands.into_iter().for_each(|cmd| {
         move_crate(&mut stacks, cmd);
+    });
+    println!("After move commands:");
+    println!("{stacks:?}");
+
+    println!("Part 1 answer:");
+    let result_part1: String = stacks
+        .into_iter()
+        .filter_map(|stack| stack.top())
+        .fold("".to_string(), |acc, crt| format!("{}{}", acc, *crt));
+    println!("{result_part1}");
+}
+
+fn part_2(mut stacks: Vec<Stack>, commands: Vec<MoveCommand>) {
+    commands.into_iter().for_each(|cmd| {
+        move_crate_and_retain_order(&mut stacks, cmd);
     });
     println!("After move commands:");
     println!("{stacks:?}");

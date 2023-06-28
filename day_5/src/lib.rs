@@ -118,6 +118,19 @@ pub fn move_crate(stacks: &mut Vec<Stack>, command: MoveCommand) {
     }
 }
 
+pub fn move_crate_and_retain_order(stacks: &mut Vec<Stack>, command: MoveCommand) {
+    let poped_from = (1..=command.count())
+        .map(|_| stacks.get_mut(command.from() - 1).unwrap().pop())
+        .collect::<Option<Vec<_>>>()
+        .expect("expected to pop all elements from stack");
+
+    let to = stacks.get_mut(command.to() - 1).unwrap();
+
+    for next_to_push in poped_from.into_iter().rev() {
+        to.push(next_to_push);
+    }
+}
+
 #[derive(Debug)]
 pub enum CommandError {
     ParseInt(ParseIntError),
