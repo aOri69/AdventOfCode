@@ -110,7 +110,7 @@ impl FromStr for MoveCommand {
     }
 }
 
-pub fn move_crate(stacks: &mut Vec<Stack>, command: MoveCommand) {
+pub fn move_crate(stacks: &mut [Stack], command: MoveCommand) {
     for _ in 1..=command.count() {
         let poped_from = stacks.get_mut(command.from() - 1).unwrap().pop().unwrap();
         let to = stacks.get_mut(command.to() - 1).unwrap();
@@ -118,7 +118,7 @@ pub fn move_crate(stacks: &mut Vec<Stack>, command: MoveCommand) {
     }
 }
 
-pub fn move_crate_and_retain_order(stacks: &mut Vec<Stack>, command: MoveCommand) {
+pub fn move_crate_and_retain_order(stacks: &mut [Stack], command: MoveCommand) {
     let poped_from = (1..=command.count())
         .map(|_| stacks.get_mut(command.from() - 1).unwrap().pop())
         .collect::<Option<Vec<_>>>()
