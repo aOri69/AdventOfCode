@@ -9,3 +9,4 @@ Advent of Code 2022 repo with solutions written in Rust
 - [Day 3: Rucksack Reorganization](day_3/README.md)
 - [Day 4: Camp Cleanup](day_4/README.md)
 - [Day 5: Supply Stacks](day_5/README.md)
+- [Day 6: Tunning Trouble](day_6/README.md)
