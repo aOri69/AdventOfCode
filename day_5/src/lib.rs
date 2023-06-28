@@ -1,4 +1,4 @@
-use std::{fmt::Display, ops::Deref};
+use std::{fmt::Display, num::ParseIntError, ops::Deref, str::FromStr};
 
 #[derive(Clone, Copy)]
 pub struct Crate(char);
@@ -36,6 +36,9 @@ impl Stack {
     pub fn push(&mut self, item: Crate) {
         self.0.push(item)
     }
+    pub fn top(&self) -> Option<Crate> {
+        self.0.last().copied()
+    }
 }
 
 pub fn transpose<T>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
@@ -66,3 +69,80 @@ pub fn parse_into_crates(s: &str) -> Vec<Option<Crate>> {
         })
         .collect()
 }
+
+#[derive(Debug, Clone, Copy)]
+pub struct MoveCommand {
+    count: usize,
+    from: usize,
+    to: usize,
+}
+
+impl MoveCommand {
+    pub fn count(&self) -> usize {
+        self.count
+    }
+    pub fn from(&self) -> usize {
+        self.from
+    }
+    pub fn to(&self) -> usize {
+        self.to
+    }
+}
+
+impl FromStr for MoveCommand {
+    type Err = CommandError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let tokens = s.split_ascii_whitespace().collect::<Vec<_>>();
+
+        if tokens.len() != 6 {
+            return Err(CommandError::WrongLength);
+        }
+        if !tokens.first().is_some_and(|t| *t == "move") {
+            return Err(CommandError::WrongCommand);
+        }
+
+        Ok(MoveCommand {
+            count: tokens.get(1).unwrap().parse()?,
+            from: tokens.get(3).unwrap().parse()?,
+            to: tokens.get(5).unwrap().parse()?,
+        })
+    }
+}
+
+pub fn move_crate(stacks: &mut Vec<Stack>, command: MoveCommand) {
+    for _ in 1..=command.count() {
+        let poped_from = stacks.get_mut(command.from() - 1).unwrap().pop().unwrap();
+        let to = stacks.get_mut(command.to() - 1).unwrap();
+        to.push(poped_from);
+    }
+}
+
+#[derive(Debug)]
+pub enum CommandError {
+    ParseInt(ParseIntError),
+    WrongLength,
+    WrongCommand,
+}
+
+impl std::fmt::Display for CommandError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CommandError::ParseInt(inner) => {
+                f.write_str(format!("failed to parse integer: {inner}").as_str())
+            }
+            CommandError::WrongLength => {
+                f.write_str("expected 6 tokens in command line separated by space")
+            }
+            CommandError::WrongCommand => f.write_str("Wrong command"),
+        }
+    }
+}
+
+impl From<ParseIntError> for CommandError {
+    fn from(error: ParseIntError) -> Self {
+        CommandError::ParseInt(error)
+    }
+}
+
+impl std::error::Error for CommandError {}

@@ -1,7 +1,9 @@
-use supply_stacks::{parse_into_crates, Stack};
+use std::str::FromStr;
+
+use supply_stacks::{move_crate, parse_into_crates, CommandError, MoveCommand, Stack};
 
 fn main() {
-    let input_lines = include_str!("../input_test.txt").lines();
+    let input_lines = include_str!("../input.txt").lines();
 
     let stacks_str = input_lines
         // Hope this is just an iterator clone
@@ -38,9 +40,27 @@ fn main() {
             });
     }
 
+    println!("Before move commands:");
     println!("{stacks:?}");
 
     // Using the original iterator shifted by Crates lines + one empty \n line
-    let commands = input_lines.skip(len).collect::<Vec<_>>();
-    dbg!(commands);
+    let input_lines = input_lines.skip(len);
+    let commands = input_lines
+        .map(MoveCommand::from_str)
+        .collect::<Result<Vec<_>, CommandError>>()
+        .expect("expected to parse all commands");
+    // println!("{commands:?}");
+
+    commands.into_iter().for_each(|cmd| {
+        move_crate(&mut stacks, cmd);
+    });
+    println!("After move commands:");
+    println!("{stacks:?}");
+
+    println!("Part 1 answer:");
+    let result_part1: String = stacks
+        .into_iter()
+        .filter_map(|stack| stack.top())
+        .fold("".to_string(), |acc, crt| format!("{}{}", acc, *crt));
+    println!("{result_part1}");
 }
