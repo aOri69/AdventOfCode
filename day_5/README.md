@@ -79,7 +79,7 @@ The CrateMover 9001 is notable for many new and exciting features: air condition
 
 Again considering the example above, the crates begin in the same configuration:
 
-```
+```text
     [D]    
 [N] [C]    
 [Z] [M] [P]
@@ -88,7 +88,7 @@ Again considering the example above, the crates begin in the same configuration:
 
 Moving a single crate from stack 2 to stack 1 behaves the same as before:
 
-```
+```text
 [D]        
 [N] [C]    
 [Z] [M] [P]
@@ -97,7 +97,7 @@ Moving a single crate from stack 2 to stack 1 behaves the same as before:
 
 However, the action of moving three crates from stack 1 to stack 3 means that those three moved crates _stay in the same order_, resulting in this new configuration:
 
-```
+```text
         [D]
         [N]
     [C] [Z]
@@ -107,7 +107,7 @@ However, the action of moving three crates from stack 1 to stack 3 means that th
 
 Next, as both crates are moved from stack 2 to stack 1, they _retain their order_ as well:
 
-```
+```text
         [D]
         [N]
 [C]     [Z]
@@ -117,7 +117,7 @@ Next, as both crates are moved from stack 2 to stack 1, they _retain their order
 
 Finally, a single crate is still moved from stack 1 to stack 2, but now it's crate `C` that gets moved:
 
-```
+```text
         [D]
         [N]
         [Z]
