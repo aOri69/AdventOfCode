@@ -1,11 +1,12 @@
-use no_space_left_on_device::parse_command;
+use no_space_left_on_device::parse_line;
+use nom::{combinator::all_consuming, Finish};
 
 fn main() {
     let input = include_str!("../input.txt");
-    // println!("{:?}", input);
+
     let res = input
         .lines()
-        .filter_map(|l| parse_command(l).ok())
+        .map(|l| all_consuming(parse_line)(l).finish().unwrap().1)
         .collect::<Vec<_>>();
     println!("{res:?}");
 }

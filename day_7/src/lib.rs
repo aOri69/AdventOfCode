@@ -3,20 +3,43 @@ use nom::{
     bytes::complete::tag,
     character::complete::{multispace1, not_line_ending},
     combinator::map,
-    sequence::{preceded, terminated},
+    sequence::{preceded, separated_pair, terminated},
     IResult,
 };
 
+/// Struct represents list terminal command
+/// `ls`
 #[derive(Debug, PartialEq, Eq)]
 pub struct Ls;
 
+/// Struct represents change directory command
+/// `cd path`. Path is stored as String
 #[derive(Debug, PartialEq, Eq)]
 pub struct Cd(String);
 
+/// Enum with all the available commands in this task
+/// `ls` and `cd`
 #[derive(Debug, PartialEq, Eq)]
 pub enum Command {
     Ls(Ls),
     Cd(Cd),
+}
+
+/// Type of terminal output after `ls` command
+/// Can be either `directory` or `file`
+#[derive(Debug, PartialEq, Eq)]
+pub enum Entry {
+    Dir(String),
+    File(u64, String),
+}
+
+/// Each line of terminal input/output
+/// can be either a command `$ command`
+/// or a command `ls` output
+#[derive(Debug, PartialEq, Eq)]
+pub enum Line {
+    Command(Command),
+    Entry(Entry),
 }
 
 pub fn parse_ls(input: &str) -> IResult<&str, Ls> {
@@ -38,8 +61,34 @@ pub fn parse_command(input: &str) -> IResult<&str, Command> {
     preceded(shell_line_begin, alt((cmd_ls, cmd_cd)))(input)
 }
 
+pub fn parse_entry(input: &str) -> IResult<&str, Entry> {
+    let dir = map(
+        preceded(terminated(tag("dir"), multispace1), not_line_ending),
+        |s: &str| Entry::Dir(s.to_string()),
+    );
+    let file = map(
+        separated_pair(
+            nom::character::complete::u64,
+            tag(" "),
+            map(not_line_ending, |p: &str| p.to_string()),
+        ),
+        |(s, p)| Entry::File(s, p),
+    );
+
+    alt((dir, file))(input)
+}
+
+pub fn parse_line(input: &str) -> IResult<&str, Line> {
+    alt((
+        map(parse_command, Line::Command),
+        map(parse_entry, Line::Entry),
+    ))(input)
+}
+
 #[cfg(test)]
 mod tests {
+    use nom::{combinator::all_consuming, Finish};
+
     use super::*;
 
     #[test]
@@ -61,5 +110,38 @@ mod tests {
             parse_command("$ cd /"),
             Ok(("", Command::Cd(Cd("/".to_string()))))
         );
+    }
+
+    #[test]
+    fn test_full_input() {
+        let input = "$ cd /
+$ ls
+dir a
+14848514 b.txt
+8504156 c.dat
+dir d
+$ cd a
+$ ls
+dir e
+29116 f
+2557 g
+62596 h.lst
+$ cd e
+$ ls
+584 i
+$ cd ..
+$ cd ..
+$ cd d
+$ ls
+4060174 j
+8033020 d.log
+5626152 d.ext
+7214296 k";
+
+        let res = input
+            .lines()
+            .map(|l| all_consuming(parse_line)(l).finish().unwrap().1)
+            .collect::<Vec<_>>();
+        println!("{res:?}");
     }
 }
