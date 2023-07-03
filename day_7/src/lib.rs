@@ -1,4 +1,5 @@
 use nom::{
+    branch::alt,
     bytes::complete::tag,
     character::complete::{multispace1, not_line_ending},
     combinator::map,
@@ -12,6 +13,7 @@ pub struct Ls;
 #[derive(Debug, PartialEq, Eq)]
 pub struct Cd(String);
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum Command {
     Ls(Ls),
     Cd(Cd),
@@ -28,8 +30,12 @@ pub fn parse_cd(input: &str) -> IResult<&str, Cd> {
     )(input)
 }
 
-pub fn parse_command(_input: &str) -> IResult<&str, Command> {
-    todo!()
+pub fn parse_command(input: &str) -> IResult<&str, Command> {
+    let shell_line_begin = terminated(tag("$"), multispace1);
+    let cmd_ls = map(parse_ls, Command::Ls);
+    let cmd_cd = map(parse_cd, Command::Cd);
+
+    preceded(shell_line_begin, alt((cmd_ls, cmd_cd)))(input)
 }
 
 #[cfg(test)]
@@ -38,13 +44,22 @@ mod tests {
 
     #[test]
     fn test_ls() {
-        let res = parse_ls("lsasdasdas");
-        assert_eq!(res, Ok(("asdasdas", Ls)));
+        assert_eq!(parse_ls("lsasdasdas"), Ok(("asdasdas", Ls)));
     }
 
     #[test]
     fn test_cd() {
-        let res = parse_cd("cd /home\r\n");
-        assert_eq!(res, Ok(("\r\n", Cd("/home".to_string()))));
+        assert_eq!(
+            parse_cd("cd /home\r\n"),
+            Ok(("\r\n", Cd("/home".to_string())))
+        );
+    }
+
+    #[test]
+    fn test_command() {
+        assert_eq!(
+            parse_command("$ cd /"),
+            Ok(("", Command::Cd(Cd("/".to_string()))))
+        );
     }
 }
