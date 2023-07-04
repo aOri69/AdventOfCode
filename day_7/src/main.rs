@@ -4,9 +4,9 @@ use nom::{combinator::all_consuming, Finish};
 fn main() {
     let input = include_str!("../input.txt");
 
-    let res = input
+    let parsed_lines = input
         .lines()
-        .map(|l| all_consuming(parse_line)(l).finish().unwrap().1)
-        .collect::<Vec<_>>();
-    println!("{res:?}");
+        .map(|l| all_consuming(parse_line)(l).finish().unwrap().1);
+
+    parsed_lines.for_each(|line| println!("{line:?}"));
 }

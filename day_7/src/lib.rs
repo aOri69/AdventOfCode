@@ -21,8 +21,20 @@ pub struct Cd(String);
 /// `ls` and `cd`
 #[derive(Debug, PartialEq, Eq)]
 pub enum Command {
-    Ls(Ls),
-    Cd(Cd),
+    Ls,
+    Cd(String),
+}
+
+impl From<Ls> for Command {
+    fn from(_: Ls) -> Self {
+        Command::Ls
+    }
+}
+
+impl From<Cd> for Command {
+    fn from(value: Cd) -> Self {
+        Command::Cd(value.0)
+    }
 }
 
 /// Type of terminal output after `ls` command
@@ -55,8 +67,8 @@ pub fn parse_cd(input: &str) -> IResult<&str, Cd> {
 
 pub fn parse_command(input: &str) -> IResult<&str, Command> {
     let shell_line_begin = terminated(tag("$"), multispace1);
-    let cmd_ls = map(parse_ls, Command::Ls);
-    let cmd_cd = map(parse_cd, Command::Cd);
+    let cmd_ls = map(parse_ls, Into::into);
+    let cmd_cd = map(parse_cd, Into::into);
 
     preceded(shell_line_begin, alt((cmd_ls, cmd_cd)))(input)
 }
@@ -108,7 +120,7 @@ mod tests {
     fn test_command() {
         assert_eq!(
             parse_command("$ cd /"),
-            Ok(("", Command::Cd(Cd("/".to_string()))))
+            Ok(("", Command::Cd("/".to_string())))
         );
     }
 
