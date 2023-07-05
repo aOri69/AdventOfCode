@@ -7,6 +7,9 @@ use nom::{
     IResult,
 };
 
+mod tree;
+pub use tree::*;
+
 /// Struct represents list terminal command
 /// `ls`
 #[derive(Debug, PartialEq, Eq)]
@@ -154,6 +157,7 @@ $ ls
             .lines()
             .map(|l| all_consuming(parse_line)(l).finish().unwrap().1)
             .collect::<Vec<_>>();
-        println!("{res:?}");
+
+        res.iter().for_each(|l| println!("{l:?}"));
     }
 }
