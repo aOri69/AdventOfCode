@@ -1,12 +1,25 @@
-use no_space_left_on_device::parse_line;
-use nom::{combinator::all_consuming, Finish};
+use no_space_left_on_device::{get_parsed_lines, Command, Entry, Line};
 
 fn main() {
-    let input = include_str!("../input.txt");
+    let input = include_str!("../input_test.txt");
+    let parsed_lines = get_parsed_lines(input);
 
-    let parsed_lines = input
-        .lines()
-        .map(|l| all_consuming(parse_line)(l).finish().unwrap().1);
+    for line in parsed_lines {
+        println!("{line:?}");
 
-    parsed_lines.for_each(|line| println!("{line:?}"));
+        match line {
+            Line::Command(command) => match command {
+                Command::Ls => continue,
+                Command::Cd(dir) => match dir.as_str() {
+                    "/" => todo!(),
+                    ".." => todo!(),
+                    _ => todo!(),
+                },
+            },
+            Line::Entry(entry) => match entry {
+                Entry::Dir(_dir) => todo!(),
+                Entry::File(_size, _name) => todo!(),
+            },
+        }
+    }
 }
