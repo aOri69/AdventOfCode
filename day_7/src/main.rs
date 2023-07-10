@@ -1,8 +1,16 @@
-use no_space_left_on_device::{get_parsed_lines, Command, Entry, Line};
+use std::{cell::RefCell, rc::Rc};
+
+use no_space_left_on_device::{directory::Node, get_parsed_lines, Command, Entry, Line};
 
 fn main() {
     let input = include_str!("../input_test.txt");
     let parsed_lines = get_parsed_lines(input);
+
+    // "/" root directory
+    let root = Rc::new(RefCell::new(Node::default()));
+    // current iteration directory
+    // initially - root one
+    let mut node = Rc::clone(&root);
 
     for line in parsed_lines {
         println!("{line:?}");
