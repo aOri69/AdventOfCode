@@ -2,57 +2,12 @@ use nom::{
     branch::alt,
     bytes::complete::tag,
     character::complete::{multispace1, not_line_ending},
-    combinator::map,
+    combinator::{all_consuming, map},
     sequence::{preceded, separated_pair, terminated},
-    IResult,
+    Finish, IResult,
 };
 
-/// Struct represents list terminal command
-/// `ls`
-#[derive(Debug, PartialEq, Eq)]
-struct Ls;
-
-/// Struct represents change directory command
-/// `cd path`. Path is stored as String
-#[derive(Debug, PartialEq, Eq)]
-struct Cd(String);
-
-/// Enum with all the available commands in this task
-/// `ls` and `cd`
-#[derive(Debug, PartialEq, Eq)]
-pub enum Command {
-    Ls,
-    Cd(String),
-}
-
-impl From<Ls> for Command {
-    fn from(_: Ls) -> Self {
-        Command::Ls
-    }
-}
-
-impl From<Cd> for Command {
-    fn from(value: Cd) -> Self {
-        Command::Cd(value.0)
-    }
-}
-
-/// Type of terminal output after `ls` command
-/// Can be either `directory` or `file`
-#[derive(Debug, PartialEq, Eq)]
-pub enum Entry {
-    Dir(String),
-    File(u64, String),
-}
-
-/// Each line of terminal input/output
-/// can be either a command `$ command`
-/// or a command `ls` output
-#[derive(Debug, PartialEq, Eq)]
-pub enum Line {
-    Command(Command),
-    Entry(Entry),
-}
+use crate::structs::{Cd, Command, Entry, Line, Ls};
 
 fn parse_ls(input: &str) -> IResult<&str, Ls> {
     map(tag("ls"), |_| Ls)(input)
@@ -90,19 +45,24 @@ fn parse_entry(input: &str) -> IResult<&str, Entry> {
     alt((dir, file))(input)
 }
 
-pub fn parse_line(input: &str) -> IResult<&str, Line> {
+fn parse_line(input: &str) -> IResult<&str, Line> {
     alt((
         map(parse_command, Line::Command),
         map(parse_entry, Line::Entry),
     ))(input)
 }
 
+/// High level function to turn `&str` input
+/// into the Iterator of `parser::Line` items
+/// which could be either `Command` or `Entry`
+pub fn get_parsed_lines(input: &str) -> impl Iterator<Item = Line> + '_ {
+    input
+        .lines()
+        .map(|l| all_consuming(parse_line)(l).finish().unwrap().1)
+}
+
 #[cfg(test)]
 mod tests {
-    // use nom::{combinator::all_consuming, Finish};
-
-    use nom::{combinator::all_consuming, Finish};
-
     use super::*;
 
     #[test]
@@ -127,36 +87,67 @@ mod tests {
     }
 
     #[test]
-    fn test_full_input() {
-        let input = "$ cd /
-    $ ls
-    dir a
-    14848514 b.txt
-    8504156 c.dat
-    dir d
-    $ cd a
-    $ ls
-    dir e
-    29116 f
-    2557 g
-    62596 h.lst
-    $ cd e
-    $ ls
-    584 i
-    $ cd ..
-    $ cd ..
-    $ cd d
-    $ ls
-    4060174 j
-    8033020 d.log
-    5626152 d.ext
-    7214296 k";
+    fn test_parse_ls() {
+        let result = parse_ls("ls");
+        assert_eq!(result, Ok(("", Ls)));
+    }
 
-        let res = input
-            .lines()
-            .map(|l| all_consuming(parse_line)(l).finish().unwrap().1)
-            .collect::<Vec<_>>();
+    #[test]
+    fn test_parse_cd() {
+        let result = parse_cd("cd path");
+        assert_eq!(result, Ok(("", Cd("path".to_string()))));
+    }
 
-        res.iter().for_each(|l| println!("{l:?}"));
+    #[test]
+    fn test_parse_command_ls() {
+        let result = parse_command("$ ls");
+        assert_eq!(result, Ok(("", Command::Ls)));
+    }
+
+    #[test]
+    fn test_parse_command_cd() {
+        let result = parse_command("$ cd path");
+        assert_eq!(result, Ok(("", Command::Cd("path".to_string()))));
+    }
+
+    #[test]
+    fn test_parse_entry_dir() {
+        let result = parse_entry("dir directory_name");
+        assert_eq!(result, Ok(("", Entry::Dir("directory_name".to_string()))));
+    }
+
+    #[test]
+    fn test_parse_entry_file() {
+        let result = parse_entry("1234 file_name.txt");
+        assert_eq!(
+            result,
+            Ok(("", Entry::File(1234, "file_name.txt".to_string())))
+        );
+    }
+
+    #[test]
+    fn test_parse_line_command() {
+        let result = parse_line("$ ls");
+        assert_eq!(result, Ok(("", Line::Command(Command::Ls))));
+    }
+
+    #[test]
+    fn test_parse_line_entry() {
+        let result = parse_line("dir directory_name");
+        assert_eq!(
+            result,
+            Ok(("", Line::Entry(Entry::Dir("directory_name".to_string()))))
+        );
+    }
+
+    #[test]
+    fn test_get_parsed_lines() {
+        let input = "$ ls\ndir directory_name";
+        let expected = vec![
+            Line::Command(Command::Ls),
+            Line::Entry(Entry::Dir("directory_name".to_string())),
+        ];
+        let parsed_lines: Vec<Line> = get_parsed_lines(input).collect();
+        assert_eq!(parsed_lines, expected);
     }
 }
