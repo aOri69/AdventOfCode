@@ -1,48 +1,61 @@
+#[allow(dead_code, unused_variables, unused_assignments)]
 pub mod directory;
 mod parser;
 mod structs;
 
-use std::collections::BTreeMap;
-
+use crate::directory::Node;
 use parser::get_parsed_lines;
-
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
-struct Directory(String);
-#[derive(Debug)]
-struct File(usize, String);
-#[derive(Debug)]
-enum FileSystemEntry {
-    Dir(Directory),
-    File(File),
-}
+use std::{
+    cell::RefCell,
+    rc::{Rc, Weak},
+};
 
 pub fn part_1(input: &str) -> u32 {
     let parsed_lines = get_parsed_lines(input);
 
-    let mut directories: BTreeMap<Directory, Vec<FileSystemEntry>> = BTreeMap::new();
-    // adding root
-    directories.insert(Directory("/".to_owned()), vec![]);
+    let root = Rc::new(RefCell::new(Node::new("/", Weak::new())));
 
-    let mut current_dir = directories.entry(Directory("/".to_owned()));
+    let mut current_dir = Rc::clone(&root);
 
     for line in parsed_lines {
         println!("{line:?}");
         match line {
             structs::Line::Command(cmd) => match cmd {
                 structs::Command::Ls => continue,
-                structs::Command::Cd(path) => {
-                    directories.entry(Directory(path.clone())).or_insert(vec![]);
-                    current_dir = directories.entry(Directory(path));
+                structs::Command::Cd(path) => match path.as_str() {
+                    "/" => current_dir = Rc::clone(&root),
+                    ".." => {
+                        let parent = current_dir.borrow().parent().upgrade().unwrap();
+                        current_dir = parent;
+                    }
+                    path => {
+                        let child_dir = current_dir
+                            .borrow_mut()
+                            .children_mut()
+                            .iter()
+                            .find(|x| x.borrow().name() == path)
+                            .unwrap()
+                            .clone();
+                        current_dir = child_dir;
+                    }
+                },
+            },
+            structs::Line::Entry(entry) => match entry {
+                structs::Entry::Dir(path) => {
+                    let new_child_dir =
+                        Rc::new(RefCell::new(Node::new(&path, Rc::downgrade(&current_dir))));
+                    current_dir.borrow_mut().children_mut().push(new_child_dir);
+                }
+                structs::Entry::File(size, name) => {
+                    let new_child_file =
+                        Rc::new(RefCell::new(Node::new(&name, Rc::downgrade(&current_dir))));
+                    new_child_file.borrow_mut().set_size(size);
+                    current_dir.borrow_mut().children_mut().push(new_child_file);
                 }
             },
-            structs::Line::Entry(entry) => continue,
-            // structs::Line::Entry(entry) => match entry {
-            //     structs::Entry::Dir(path) => directories.entry(path),
-            //     structs::Entry::File(size, name) => todo!(),
-            // },
         };
     }
-    dbg!(directories);
+    println!("{root:#?}");
     todo!("part1");
 }
 
