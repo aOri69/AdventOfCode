@@ -3,22 +3,25 @@ pub mod directory;
 mod parser;
 mod structs;
 
-use crate::directory::Node;
+use crate::directory::{Node, PrettyNode};
 use parser::get_parsed_lines;
 use std::{
     cell::RefCell,
     rc::{Rc, Weak},
 };
 
-pub fn part_1(input: &str) -> u32 {
+/// Actual soution for Day 7 Part 1 of Advent of Code 2022
+pub fn part_1(input: &str) -> u64 {
     let parsed_lines = get_parsed_lines(input);
 
     let root = Rc::new(RefCell::new(Node::new("/", Weak::new())));
 
     let mut current_dir = Rc::clone(&root);
 
+    let mut directories = vec![Rc::clone(&current_dir)];
+
     for line in parsed_lines {
-        println!("{line:?}");
+        // println!("{line:?}");
         match line {
             structs::Line::Command(cmd) => match cmd {
                 structs::Command::Ls => continue,
@@ -44,6 +47,7 @@ pub fn part_1(input: &str) -> u32 {
                 structs::Entry::Dir(path) => {
                     let new_child_dir =
                         Rc::new(RefCell::new(Node::new(&path, Rc::downgrade(&current_dir))));
+                    directories.push(Rc::clone(&new_child_dir));
                     current_dir.borrow_mut().children_mut().push(new_child_dir);
                 }
                 structs::Entry::File(size, name) => {
@@ -55,8 +59,20 @@ pub fn part_1(input: &str) -> u32 {
             },
         };
     }
-    println!("{root:#?}");
-    todo!("part1");
+
+    drop(current_dir);
+
+    println!("{:#?}", PrettyNode(&root));
+    println!("root size: {}", &root.borrow().size());
+
+    directories
+        .iter()
+        .map(|d| d.borrow().size())
+        .filter(|&s| s <= 100_000)
+        .inspect(|s| {
+            dbg!(s);
+        })
+        .sum()
 }
 
 pub fn part_2(_input: &str) {

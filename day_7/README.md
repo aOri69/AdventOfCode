@@ -6,7 +6,7 @@ You can hear birds chirping and raindrops hitting leaves as the expedition proce
 
 The device the Elves gave you has problems with more than just its communication system. You try to run a system update:
 
-```text
+```shell
 $ system-update --please --pretty-please-with-sugar-on-top
 Error: No space left on device
 ```
@@ -55,7 +55,7 @@ Within the terminal output, lines that begin with `$` are _commands you executed
 
 Given the commands and output in the example above, you can determine that the filesystem looks visually like this:
 
-```text
+```shell
 - / (dir)
   - a (dir)
     - e (dir)
@@ -86,3 +86,24 @@ The total sizes of the directories above can be found as follows:
 To begin, find all of the directories with a total size of _at most 100000_, then calculate the sum of their total sizes. In the example above, these directories are `a` and `e`; the sum of their total sizes is `_95437_` (94853 + 584). (As in this example, this process can count files more than once!)
 
 Find all of the directories with a total size of at most 100000. _What is the sum of the total sizes of those directories?_
+
+Your puzzle answer was `1141028`.
+
+## \--- Part Two ---
+
+Now, you're ready to choose a directory to delete.
+
+The total disk space available to the filesystem is `_70000000_`. To run the update, you need unused space of at least `_30000000_`. You need to find a directory you can delete that will _free up enough space_ to run the update.
+
+In the example above, the total size of the outermost directory (and thus the total amount of used space) is `48381165`; this means that the size of the _unused_ space must currently be `21618835`, which isn't quite the `30000000` required by the update. Therefore, the update still requires a directory with total size of at least `8381165` to be deleted before it can run.
+
+To achieve this, you have the following options:
+
+- Delete directory `e`, which would increase unused space by `584`.
+- Delete directory `a`, which would increase unused space by `94853`.
+- Delete directory `d`, which would increase unused space by `24933642`.
+- Delete directory `/`, which would increase unused space by `48381165`.
+
+Directories `e` and `a` are both too small; deleting them would not free up enough space. However, directories `d` and `/` are both big enough! Between these, choose the _smallest_: `d`, increasing unused space by `_24933642_`.
+
+Find the smallest directory that, if deleted, would free up enough space on the filesystem to run the update. _What is the total size of that directory?_
