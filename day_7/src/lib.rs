@@ -10,8 +10,7 @@ use std::{
     rc::{Rc, Weak},
 };
 
-/// Actual soution for Day 7 Part 1 of Advent of Code 2022
-pub fn part_1(input: &str) -> u64 {
+fn get_filsystem_directories(input: &str) -> Vec<Rc<RefCell<Node>>> {
     let parsed_lines = get_parsed_lines(input);
 
     let root = Rc::new(RefCell::new(Node::new("/", Weak::new())));
@@ -66,6 +65,11 @@ pub fn part_1(input: &str) -> u64 {
     println!("root size: {}", &root.borrow().size());
 
     directories
+}
+
+/// Actual soution for Day 7 Part 1 of Advent of Code 2022
+pub fn part_1(input: &str) -> u64 {
+    get_filsystem_directories(input)
         .iter()
         .map(|d| d.borrow().size())
         .filter(|&s| s <= 100_000)
@@ -75,8 +79,32 @@ pub fn part_1(input: &str) -> u64 {
         .sum()
 }
 
-pub fn part_2(_input: &str) {
-    todo!("part2");
+pub fn part_2(input: &str) -> u64 {
+    const FS_SIZE: u64 = 70_000_000;
+    const TO_BE_FREE: u64 = 30_000_000;
+
+    let mut directories = get_filsystem_directories(input)
+        .iter()
+        .map(|d| d.borrow().size())
+        .collect::<Vec<_>>();
+    // First element in Vec must be root size
+    let unused_space = FS_SIZE - directories.first().copied().unwrap_or(0);
+    let to_be_cleaned = TO_BE_FREE - unused_space;
+    println!("Unused space - {unused_space:?}");
+    println!("To be cleaned - {to_be_cleaned:?}");
+    directories.sort();
+    let upper_bound_idx = directories
+        .binary_search_by(|&element| match element.cmp(&to_be_cleaned) {
+            // Since we try to find position right after searched value,
+            // we treat all equal values as less to move right.
+            std::cmp::Ordering::Equal => std::cmp::Ordering::Less,
+            ord => ord,
+        })
+        // Since `std::upper_bound` always return position
+        // which doesn't point to searched value,
+        // we would always get `Err` value from bsearch.
+        .unwrap_err();
+    directories.get(upper_bound_idx).copied().unwrap_or(0)
 }
 
 #[cfg(test)]
@@ -114,6 +142,6 @@ $ ls
 
     #[test]
     fn test_part_2() {
-        part_2(INPUT);
+        assert_eq!(part_2(INPUT), 24933642);
     }
 }
