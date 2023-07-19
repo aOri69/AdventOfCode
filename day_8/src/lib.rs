@@ -1,9 +1,15 @@
-pub fn part_1(_input: &str) -> u32 {
+use crate::tree::Forest;
+
+mod tree;
+
+pub fn part_1(input: &str) -> Result<u32, String> {
+    let grid = Forest::build(input);
+    dbg!(grid);
     todo!("part1");
 }
 
-pub fn part_2(_input: &str) -> u32 {
-    todo!("part1");
+pub fn part_2(_input: &str) -> Result<u32, String> {
+    todo!("part2");
 }
 
 #[cfg(test)]
@@ -18,7 +24,7 @@ mod tests {
 
     #[test]
     fn test_part_1() {
-        assert_eq!(part_1(TEST_INPUT), 21);
+        assert_eq!(part_1(TEST_INPUT), Ok(21));
     }
 
     #[test]
