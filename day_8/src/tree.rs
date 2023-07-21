@@ -37,15 +37,49 @@ impl Forest {
 
         for line in s.lines() {
             grid.push(vec![]);
-            let last_row = grid.len();
-            println!("line {}", last_row);
             for tree in line.chars() {
                 grid.last_mut().unwrap().push(Tree::from(tree));
-                let last_col = grid.last().unwrap().len();
-                println!("col {}", last_col);
             }
         }
+
+        if let Some(row) = grid.first() {
+            for (col, _tree) in row.iter().enumerate() {
+                let col_iter = TreeColIter::new(&grid, col);
+                println!("{:?}", col_iter.collect::<Vec<_>>());
+                // for col_tree in col_iter {
+                //     print!("{col_tree}");
+                // }
+                // println!();
+            }
+        }
+
         Self { trees: grid }
+    }
+}
+
+struct TreeColIter<'a> {
+    trees: &'a Grid,
+    col: usize,
+    current_row: usize,
+}
+
+impl TreeColIter<'_> {
+    pub fn new(trees: &Grid, col: usize) -> TreeColIter<'_> {
+        TreeColIter {
+            trees,
+            col,
+            current_row: 0,
+        }
+    }
+}
+
+impl<'a> Iterator for TreeColIter<'a> {
+    type Item = &'a Tree;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let row = self.trees.get(self.current_row).or(None)?;
+        self.current_row += 1;
+        row.get(self.col)
     }
 }
 
