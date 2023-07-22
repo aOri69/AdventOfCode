@@ -4,12 +4,12 @@ pub trait Visible {
 
 pub trait VerticalIterator: Iterator {}
 
-#[derive(Default)]
-pub struct Tree(u8);
+#[derive(Default, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Tree(u32);
 
 impl From<char> for Tree {
     fn from(value: char) -> Self {
-        Self(value.to_digit(10).unwrap_or_default() as u8)
+        Self(value.to_digit(10).unwrap_or_default())
     }
 }
 
@@ -25,46 +25,90 @@ impl std::fmt::Debug for Tree {
     }
 }
 
-type Grid = Vec<Vec<Tree>>;
+type TreeGrid = Vec<Vec<Tree>>;
+pub type VisibilityGrid = Vec<Vec<bool>>;
 
 pub struct Forest {
-    trees: Grid,
+    trees: TreeGrid,
 }
 
 impl Forest {
     pub fn build(s: &str) -> Forest {
-        let mut grid: Grid = vec![];
+        let mut grid: TreeGrid = vec![];
 
         for line in s.lines() {
             grid.push(vec![]);
             for tree in line.chars() {
-                grid.last_mut().unwrap().push(Tree::from(tree));
+                let tree = Tree::from(tree);
+                grid.last_mut().unwrap().push(tree);
             }
         }
-
-        if let Some(row) = grid.first() {
-            for (col, _tree) in row.iter().enumerate() {
-                let col_iter = TreeColIter::new(&grid, col);
-                println!("{:?}", col_iter.collect::<Vec<_>>());
-                // for col_tree in col_iter {
-                //     print!("{col_tree}");
-                // }
-                // println!();
-            }
-        }
-
         Self { trees: grid }
+    }
+
+    pub fn get_visibility_grid(&self) -> VisibilityGrid {
+        let mut visibility: VisibilityGrid = vec![];
+
+        for (row_idx, row) in self.trees.iter().enumerate() {
+            visibility.push(vec![]);
+            for (col_idx, _) in row.iter().enumerate() {
+                let visiblity_value = Forest::is_visible(&self.trees, row_idx, col_idx);
+                visibility
+                    .last_mut()
+                    .unwrap()
+                    .push(visiblity_value.is_some());
+            }
+        }
+
+        visibility
+    }
+
+    fn is_visible(grid: &TreeGrid, row: usize, col: usize) -> Option<bool> {
+        let row_vec = grid.get(row)?.iter().collect::<Vec<_>>();
+        let col_vec = TreeColIter::new(grid, col).collect::<Vec<_>>();
+        let current_tree = row_vec.get(col)?;
+
+        if row == row_vec.len() - 1 || row == 0 {
+            return Some(true);
+        }
+        if col == col_vec.len() - 1 || col == 0 {
+            return Some(true);
+        }
+
+        let left = &row_vec[..col];
+        let right = &row_vec[col + 1..];
+
+        let top = &col_vec[..row];
+        let bottom = &col_vec[row + 1..];
+        // println!("current tree: {}: {}-{}", current_tree, row, col);
+        // println!("horizontal: {:?}-{:?}", left, right);
+        // println!("vertical: {:?}-{:?}", top, bottom);
+
+        let visible_left = Some(current_tree) > left.iter().max();
+        let visible_right = Some(current_tree) > right.iter().max();
+        let visible_top = Some(current_tree) > top.iter().max();
+        let visible_bottom = Some(current_tree) > bottom.iter().max();
+
+        if visible_left || visible_right || visible_top || visible_bottom {
+            return Some(true);
+        }
+
+        // let (row_top, row_bottom) = row_vec.split_at(row);
+        // println!("{:?}-{:?}", row_top, row_bottom);
+        // let (col_left, col_right) = col_vec.split_at(col);
+        // println!("{:?}-{:?}", col_left, col_right);
+        None
     }
 }
 
 struct TreeColIter<'a> {
-    trees: &'a Grid,
+    trees: &'a TreeGrid,
     col: usize,
     current_row: usize,
 }
 
 impl TreeColIter<'_> {
-    pub fn new(trees: &Grid, col: usize) -> TreeColIter<'_> {
+    pub fn new(trees: &TreeGrid, col: usize) -> TreeColIter<'_> {
         TreeColIter {
             trees,
             col,
@@ -95,17 +139,34 @@ impl std::fmt::Debug for Forest {
     }
 }
 
-struct PrettyGrid<'a>(pub &'a Grid);
+struct PrettyGrid<'a>(pub &'a TreeGrid);
 
 impl std::fmt::Debug for PrettyGrid<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f)?;
         self.0.iter().for_each(|row| {
-            // writeln!(f).unwrap();
-            // row.iter().for_each(|tree| {
-            //     write!(f, "{:?}", tree).unwrap();
-            // })
             writeln!(f, "{:?}", row).unwrap_or_default();
+        });
+        Ok(())
+    }
+}
+
+pub struct PrettyVisibilityGrid<'a>(pub &'a VisibilityGrid);
+
+impl std::fmt::Debug for PrettyVisibilityGrid<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f)?;
+        self.0.iter().for_each(|row| {
+            write!(f, "[ ").unwrap();
+            row.iter().for_each(|b| {
+                match b {
+                    true => write!(f, "V "),
+                    false => write!(f, "I "),
+                }
+                .unwrap();
+            });
+            write!(f, "]").unwrap();
+            writeln!(f).unwrap();
         });
         Ok(())
     }
