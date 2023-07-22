@@ -16,8 +16,16 @@ pub fn part_1(input: &str) -> usize {
     result
 }
 
-pub fn part_2(_input: &str) -> usize {
-    todo!("part2");
+pub fn part_2(input: &str) -> usize {
+    let grid = Forest::build(input);
+    // dbg!(&grid);
+    // dbg!(PrettyVisibilityGrid(&grid.get_visibility_grid()));
+    grid.get_score_grid()
+        .into_iter()
+        .flatten()
+        .max()
+        .unwrap_or_default()
+    // println!("Total number of visible trees on the map: {}", result);
 }
 
 #[cfg(test)]

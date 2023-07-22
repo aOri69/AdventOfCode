@@ -4,7 +4,7 @@ pub trait Visible {
 
 pub trait VerticalIterator: Iterator {}
 
-#[derive(Default, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Default, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub struct Tree(u32);
 
 impl From<char> for Tree {
@@ -27,6 +27,7 @@ impl std::fmt::Debug for Tree {
 
 type TreeGrid = Vec<Vec<Tree>>;
 pub type VisibilityGrid = Vec<Vec<bool>>;
+pub type ScoreGrid = Vec<Vec<usize>>;
 
 pub struct Forest {
     trees: TreeGrid,
@@ -61,6 +62,73 @@ impl Forest {
         }
 
         visibility
+    }
+
+    pub fn get_score_grid(&self) -> ScoreGrid {
+        let mut score_grid: ScoreGrid = vec![];
+
+        for (row_idx, row) in self.trees.iter().enumerate() {
+            score_grid.push(vec![]);
+            for (col_idx, _tree) in row.iter().enumerate() {
+                let score = self.get_score(row_idx, col_idx).unwrap_or_default();
+                score_grid.last_mut().unwrap().push(score);
+            }
+        }
+        // dbg!(PrettyScoreGrid(&score_grid));
+        score_grid
+    }
+
+    fn get_score(&self, row: usize, col: usize) -> Option<usize> {
+        let row_vec = self.trees.get(row)?.to_vec();
+        let col_vec = TreeColIter::new(&self.trees, col)
+            .cloned()
+            .collect::<Vec<_>>();
+        let current_tree = row_vec.get(col)?;
+
+        if row == row_vec.len() - 1 || row == 0 {
+            return Some(0);
+        }
+        if col == col_vec.len() - 1 || col == 0 {
+            return Some(0);
+        }
+
+        // dbg!(&self);
+
+        // println!("current tree: {}: {}-{}", current_tree, row, col);
+        let left = &row_vec[..col];
+        let right = &row_vec[col + 1..];
+        // println!("horizontal: {:?}-{:?}", left, right);
+
+        let top = &col_vec[..row];
+        let bottom = &col_vec[row + 1..];
+        // println!("vertical: {:?}-{:?}", top, bottom);
+
+        let score_left = self.get_score_for_side(left.iter().rev().cloned(), current_tree);
+        let score_right = self.get_score_for_side(right.iter().cloned(), current_tree);
+        let score_top = self.get_score_for_side(top.iter().rev().cloned(), current_tree);
+        let score_bottom = self.get_score_for_side(bottom.iter().cloned(), current_tree);
+
+        // let score_left = left.iter().rev().take_while(|&t| t < current_tree).count();
+        // let score_right = right.iter().take_while(|&t| t < current_tree).count();
+        // let score_top = top.iter().rev().take_while(|&t| t < current_tree).count();
+        // let score_bottom = bottom.iter().take_while(|&t| t < current_tree).count();
+
+        // println!("horizontal scores: {}-{}", score_left, score_right);
+        // println!("vertical scores: {}-{}", score_top, score_bottom);
+
+        Some(score_left * score_right * score_top * score_bottom)
+    }
+
+    fn get_score_for_side(&self, tree_iter: impl Iterator<Item = Tree>, curr_tree: &Tree) -> usize {
+        let mut score = 0;
+        for tree in tree_iter {
+            if tree >= *curr_tree {
+                score += 1;
+                break;
+            }
+            score += 1;
+        }
+        score
     }
 
     fn is_visible(grid: &TreeGrid, row: usize, col: usize) -> Option<bool> {
@@ -167,6 +235,18 @@ impl std::fmt::Debug for PrettyVisibilityGrid<'_> {
             });
             write!(f, "]").unwrap();
             writeln!(f).unwrap();
+        });
+        Ok(())
+    }
+}
+
+pub struct PrettyScoreGrid<'a>(pub &'a ScoreGrid);
+
+impl std::fmt::Debug for PrettyScoreGrid<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f)?;
+        self.0.iter().for_each(|row| {
+            writeln!(f, "{:?}", row).unwrap_or_default();
         });
         Ok(())
     }
