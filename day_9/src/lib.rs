@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use nom::{
     branch::alt,
     character::complete::{char, digit1, space1},
@@ -28,6 +30,17 @@ impl TryFrom<(char, u32)> for Movement {
     }
 }
 
+impl Movement {
+    fn steps(&self) -> u32 {
+        match self {
+            Movement::Up(s) => *s,
+            Movement::Down(s) => *s,
+            Movement::Left(s) => *s,
+            Movement::Right(s) => *s,
+        }
+    }
+}
+
 fn get_commands(input: &str) -> Vec<Movement> {
     input
         .lines()
@@ -50,52 +63,101 @@ fn parse_movement(input: &str) -> IResult<&str, Movement> {
     )(input)
 }
 
-#[derive(Default)]
+#[derive(Debug, Default, Hash, PartialEq, Eq, Clone, Copy)]
 struct Position {
-    x: u32,
-    y: u32,
+    x: i32,
+    y: i32,
 }
 
+impl std::fmt::Display for Position {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}-{}", self.x, self.y)
+    }
+}
+
+#[derive(Debug)]
 struct Rope {
     head: Position,
     tail: Position,
+    tail_visits: HashSet<Position>,
 }
 
 impl Rope {
     fn new() -> Self {
+        let mut tail_visits = HashSet::new();
+        tail_visits.insert(Position::default());
         Self {
             head: Position::default(),
             tail: Position::default(),
+            tail_visits,
         }
     }
 
     fn process_movement(&mut self, movement: Movement) {
-        match movement {
-            Movement::Up(steps) => {
-                self.head.y += steps;
-            }
-            Movement::Down(steps) => {
-                self.head.y -= steps;
-            }
-            Movement::Left(steps) => {
-                self.head.x -= steps;
-            }
-            Movement::Right(steps) => {
-                self.head.x += steps;
-            }
+        for _ in 0..movement.steps() {
+            // println!("H {} | T {}", self.head, self.tail);
+            match movement {
+                Movement::Up(_) => self.head.y += 1,
+                Movement::Down(_) => self.head.y -= 1,
+                Movement::Left(_) => self.head.x -= 1,
+                Movement::Right(_) => self.head.x += 1,
+            };
+            self.advance_tail(&movement);
+            // println!("after : H {} | T {}", self.head, self.tail);
         }
+    }
+
+    fn advance_tail(&mut self, movement: &Movement) {
+        let y_delta = (self.head.y - self.tail.y).abs();
+        let x_delta = (self.head.x - self.tail.x).abs();
+        // Process tail movement only
+        // if distance is more than 1 in any direction(2 is a diagonal move)
+        if x_delta >= 2 || y_delta >= 2 {
+            match movement {
+                Movement::Up(_) => {
+                    self.tail.y += 1;
+                    if x_delta != 0 {
+                        self.tail.x = self.head.x;
+                    }
+                }
+                Movement::Down(_) => {
+                    self.tail.y -= 1;
+                    if x_delta != 0 {
+                        self.tail.x = self.head.x;
+                    }
+                }
+                Movement::Left(_) => {
+                    self.tail.x -= 1;
+                    if y_delta != 0 {
+                        self.tail.y = self.head.y;
+                    }
+                }
+                Movement::Right(_) => {
+                    self.tail.x += 1;
+                    if y_delta != 0 {
+                        self.tail.y = self.head.y;
+                    }
+                }
+            };
+            self.tail_visits.insert(self.tail);
+        }
+    }
+
+    fn tail_visits_count(&self) -> usize {
+        self.tail_visits.len()
     }
 }
 
-pub fn part_1(input: &str) -> u32 {
+pub fn part_1(input: &str) -> usize {
     let mut rope = Rope::new();
     let commands = get_commands(input);
 
     commands
         .into_iter()
         .for_each(|cmd| rope.process_movement(cmd));
-
-    todo!("part1")
+    // dbg!(&rope);
+    rope.tail_visits_count()
+    // todo!("part1")
 }
 
 #[cfg(test)]
