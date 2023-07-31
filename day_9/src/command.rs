@@ -2,7 +2,7 @@ mod error;
 
 use std::str::FromStr;
 
-use crate::instruction::error::CommandError;
+use crate::command::error::CommandError;
 
 use nom::{
     branch::alt,
@@ -13,7 +13,7 @@ use nom::{
     Finish, IResult,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum Direction {
     Up,
     Down,
@@ -38,22 +38,31 @@ pub struct Command {
     steps: u32,
 }
 
+/// main impl block
+impl Command {
+    pub fn direction(&self) -> Direction {
+        self.direction
+    }
+
+    pub fn steps(&self) -> u32 {
+        self.steps
+    }
+}
+
 impl FromStr for Command {
-    type Err = nom::error::Error<String>;
+    type Err = CommandError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match Command::parse_command(s).finish() {
             Ok((_remaining, command)) => Ok(command),
-            Err(nom::error::Error { input, code }) => Err(nom::error::Error {
-                input: input.to_string(),
-                code,
-            }),
+            Err(e) => Err(e.into()),
         }
     }
 }
 
+/// nom Parsing impl block
 impl Command {
-    pub fn get_commands(input: &str) -> Result<Vec<Command>, nom::error::Error<String>> {
+    pub fn get_commands(input: &str) -> Result<Vec<Command>, CommandError> {
         input.lines().map(Command::from_str).collect()
     }
 

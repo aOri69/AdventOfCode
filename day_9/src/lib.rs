@@ -1,12 +1,16 @@
+#![allow(unused_variables, dead_code)]
+// Old solution
 mod movement;
+mod rope_old;
+
+// New solution
+mod command;
 mod rope;
 
-mod instruction;
-
-use crate::movement::get_commands;
-use crate::rope::Rope;
-
 pub fn part_1(input: &str) -> usize {
+    use crate::movement::get_commands;
+    use crate::rope_old::Rope;
+
     let mut rope = Rope::new();
     let commands = get_commands(input);
 
@@ -16,6 +20,18 @@ pub fn part_1(input: &str) -> usize {
     // dbg!(&rope);
     rope.tail_visits_count()
     // todo!("part1")
+}
+
+pub fn part_1_new(input: &str) -> usize {
+    use command::Command;
+    use rope::Rope;
+    let mut rope = Rope::default();
+    let commands = Command::get_commands(input).expect("expected all commands to be parsed");
+    for cmd in commands {
+        println!("{cmd:?}");
+        rope.process_command(cmd)
+    }
+    rope.tail_visits_count()
 }
 
 #[cfg(test)]
@@ -37,10 +53,7 @@ R 2";
     }
 
     #[test]
-    fn test_new_command_parser() {
-        use instruction::Command;
-        let commands = Command::get_commands(TEST_INPUT).unwrap();
-        println!("{commands:?}");
-        assert_eq!(commands.len(), 8)
+    fn test_part_1_new() {
+        assert_eq!(part_1_new(TEST_INPUT), 13);
     }
 }
