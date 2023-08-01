@@ -21,5 +21,6 @@
 		"rust-analyzer.inlayHints.bindingModeHints.enable": true,
 		"rust-analyzer.inlayHints.closureCaptureHints.enable": true,
 		"rust-analyzer.inlayHints.maxLength": null,
+		"git.autofetch": true,
 	}
 }
