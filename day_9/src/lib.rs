@@ -25,11 +25,12 @@ pub fn part_1(input: &str) -> usize {
 pub fn part_1_new(input: &str) -> usize {
     use command::Command;
     use rope::Rope;
-    let mut rope = Rope::default();
+    let mut rope = Rope::new(1);
+    dbg!(&rope);
     let commands = Command::get_commands(input).expect("expected all commands to be parsed");
     for cmd in commands {
-        println!("{cmd:?}");
-        rope.process_command(cmd)
+        rope.process_command(cmd);
+        dbg!(&rope);
     }
     rope.tail_visits_count()
 }

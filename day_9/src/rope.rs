@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 
-use crate::command::Command;
+use crate::command::{Command, Direction};
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 pub struct Position {
     pub x: i32,
     pub y: i32,
@@ -52,19 +52,68 @@ impl std::ops::Sub for Position {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Rope {
-    head: Position,
-    tail: Position,
+    nodes: Vec<Position>,
     tail_visits: HashSet<Position>,
 }
 
+impl Default for Rope {
+    fn default() -> Self {
+        Self::new(2)
+    }
+}
+
 impl Rope {
+    pub fn new(nodes: usize) -> Self {
+        if nodes == 0 {
+            return Self {
+                nodes: vec![],
+                tail_visits: HashSet::new(),
+            };
+        }
+
+        let mut tail_visits = HashSet::new();
+        tail_visits.insert(Position::default());
+
+        Self {
+            nodes: vec![Position::default(); nodes],
+            tail_visits,
+        }
+    }
+
     pub fn process_command(&mut self, cmd: Command) {
-        todo!("process_command")
+        for _ in (0..cmd.steps()) {}
+        // advance head
+        if let Some(head) = self.head_mut() {
+            let steps = cmd.steps() as i32;
+            match cmd.direction() {
+                Direction::Up => *head += (0, steps).into(),
+                Direction::Down => *head += (0, -steps).into(),
+                Direction::Left => *head += (-steps, 0).into(),
+                Direction::Right => *head += (steps, 0).into(),
+            }
+        }
+        // advance tail
+
+        // if let Some(tail) = self.nodes.last() {
+        //     self.tail_visits.insert(*tail);
+        // }
     }
 
     pub fn tail_visits_count(&self) -> usize {
         self.tail_visits.len()
+    }
+
+    fn head(&self) -> Option<&Position> {
+        self.nodes.first()
+    }
+
+    fn head_mut(&mut self) -> Option<&mut Position> {
+        self.nodes.first_mut()
+    }
+
+    fn tail(&self) -> Option<&Position> {
+        self.nodes.last()
     }
 }
