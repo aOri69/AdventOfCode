@@ -83,7 +83,7 @@ impl Rope {
     }
 
     pub fn process_command(&mut self, cmd: Command) {
-        for _ in (0..cmd.steps()) {}
+        for _ in 0..cmd.steps() {}
         // advance head
         if let Some(head) = self.head_mut() {
             let steps = cmd.steps() as i32;

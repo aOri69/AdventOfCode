@@ -6,4 +6,6 @@ fn main() {
     println!("Part 1 answer: {:?}", part_1(input));
     // println!();
     // println!("Part 2 answer: {:?}", part_2(input));
+
+    rope_bridge::run_gui();
 }

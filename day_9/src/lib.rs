@@ -5,7 +5,10 @@ mod rope_old;
 
 // New solution
 mod command;
+mod guiapp;
 mod rope;
+
+pub use guiapp::run_gui;
 
 pub fn part_1(input: &str) -> usize {
     use crate::movement::get_commands;
