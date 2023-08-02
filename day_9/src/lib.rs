@@ -1,10 +1,5 @@
-// #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
-// #![allow(unused_variables, dead_code)]
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
-// Old solution
-mod movement;
-mod rope_old;
-// New solution
 mod app;
 mod command;
 mod rope;
