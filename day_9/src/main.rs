@@ -6,8 +6,8 @@ fn main() {
     println!("Part 1 answer: {:?}", part_1(input));
     println!("Part 2 answer: {:?}", part_2(input));
 
-    // if let Err(e) = rope_bridge::run_gui() {
-    //     eprintln!("{e}");
-    //     std::process::exit(1);
-    // }
+    if let Err(e) = rope_bridge::run_gui() {
+        eprintln!("{e}");
+        std::process::exit(1);
+    }
 }

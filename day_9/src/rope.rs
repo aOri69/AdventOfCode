@@ -157,15 +157,15 @@ impl Rope {
         self.tail_visits.len()
     }
 
-    // fn head(&self) -> Option<&Position> {
-    //     self.nodes.first()
-    // }
+    pub fn head(&self) -> Option<&Position> {
+        self.nodes.first()
+    }
 
     fn head_mut(&mut self) -> Option<&mut Position> {
         self.nodes.first_mut()
     }
 
-    // fn tail(&self) -> Option<&Position> {
-    //     self.nodes.last()
-    // }
+    pub fn tail_visits(&self) -> &HashSet<Position> {
+        &self.tail_visits
+    }
 }
