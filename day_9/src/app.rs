@@ -1,5 +1,3 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
-
 pub struct TemplateApp {
     // Example stuff:
     label: String,
@@ -18,7 +16,7 @@ impl Default for TemplateApp {
 
 impl TemplateApp {
     /// Called once before the first frame.
-    pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
+    pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
         // This is also where you can customize the look and feel of egui using
         // `cc.egui_ctx.set_visuals` and `cc.egui_ctx.set_fonts`.
 
@@ -100,7 +98,7 @@ impl eframe::App for TemplateApp {
             egui::warn_if_debug_build(ui);
         });
 
-        if false {
+        if true {
             egui::Window::new("Window").show(ctx, |ui| {
                 ui.label("Windows can be moved by dragging them.");
                 ui.label("They are automatically sized based on contents.");

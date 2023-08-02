@@ -1,40 +1,33 @@
-#![allow(unused_variables, dead_code)]
+// #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
+// #![allow(unused_variables, dead_code)]
+
 // Old solution
 mod movement;
 mod rope_old;
-
 // New solution
+mod app;
 mod command;
-mod guiapp;
 mod rope;
 
-pub use guiapp::run_gui;
+pub use app::run_gui;
 
 pub fn part_1(input: &str) -> usize {
-    use crate::movement::get_commands;
-    use crate::rope_old::Rope;
-
-    let mut rope = Rope::new();
-    let commands = get_commands(input);
-
+    let mut rope = rope::Rope::new(2);
+    let commands =
+        command::Command::get_commands(input).expect("expected all commands to be parsed");
     commands
         .into_iter()
-        .for_each(|cmd| rope.process_movement(cmd));
-    // dbg!(&rope);
+        .for_each(|cmd| rope.process_command(cmd));
     rope.tail_visits_count()
-    // todo!("part1")
 }
 
-pub fn part_1_new(input: &str) -> usize {
-    use command::Command;
-    use rope::Rope;
-    let mut rope = Rope::new(1);
-    dbg!(&rope);
-    let commands = Command::get_commands(input).expect("expected all commands to be parsed");
-    for cmd in commands {
-        rope.process_command(cmd);
-        dbg!(&rope);
-    }
+pub fn part_2(input: &str) -> usize {
+    let mut rope = rope::Rope::new(10);
+    let commands =
+        command::Command::get_commands(input).expect("expected all commands to be parsed");
+    commands
+        .into_iter()
+        .for_each(|cmd| rope.process_command(cmd));
     rope.tail_visits_count()
 }
 
@@ -51,13 +44,25 @@ D 1
 L 5
 R 2";
 
+    const TEST_INPUT_LONG_MOVE: &str = "R 5
+U 8
+L 8
+D 3
+R 17
+D 10
+L 25
+U 20
+";
+
     #[test]
     fn test_part_1() {
         assert_eq!(part_1(TEST_INPUT), 13);
+        assert_eq!(part_1(TEST_INPUT_LONG_MOVE), 88);
     }
 
     #[test]
-    fn test_part_1_new() {
-        assert_eq!(part_1_new(TEST_INPUT), 13);
+    fn test_part_2() {
+        assert_eq!(part_2(TEST_INPUT), 1);
+        assert_eq!(part_2(TEST_INPUT_LONG_MOVE), 36);
     }
 }
