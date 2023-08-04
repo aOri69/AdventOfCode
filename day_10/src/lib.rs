@@ -7,6 +7,7 @@ use nom::{
     bytes::complete::tag,
     character::complete::digit1,
     combinator::{map, map_res, value},
+    error::Error,
     sequence::separated_pair,
     Finish, IResult,
 };
@@ -17,7 +18,19 @@ enum Command {
     Addx(i32),
 }
 
-impl FromStr for Command {}
+impl FromStr for Command {
+    type Err = Error<String>;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match parse_command(s).finish() {
+            Ok((_remaining, command)) => Ok(command),
+            Err(Error { input, code }) => Err(Error {
+                input: input.to_string(),
+                code,
+            }),
+        }
+    }
+}
 
 fn parse_steps(input: &str) -> IResult<&str, i32> {
     map_res(digit1, str::parse::<i32>)(input)
