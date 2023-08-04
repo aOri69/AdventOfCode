@@ -6,13 +6,13 @@ use nom::{
     branch::alt,
     bytes::complete::tag,
     character::complete::digit1,
-    combinator::{map, map_res, value},
+    combinator::{map, map_res, opt, recognize, value},
     error::Error,
-    sequence::separated_pair,
+    sequence::{preceded, separated_pair},
     Finish, IResult,
 };
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 enum Command {
     Noop,
     Addx(i32),
@@ -32,15 +32,14 @@ impl FromStr for Command {
     }
 }
 
-fn parse_steps(input: &str) -> IResult<&str, i32> {
-    map_res(digit1, str::parse::<i32>)(input)
-}
-
 fn parse_command(input: &str) -> IResult<&str, Command> {
     // prepare separate parsers as variables closures
     let noop_parser = value(Command::Noop, tag("noop"));
+    let step_parser = map_res(recognize(preceded(opt(tag("-")), digit1)), |s| {
+        i32::from_str(s)
+    });
     let addx_parser = map(
-        separated_pair(tag("addx"), tag(" "), map_res(digit1, str::parse::<i32>)),
+        separated_pair(tag("addx"), tag(" "), step_parser),
         |(_addx, steps)| Command::Addx(steps),
     );
     // parse
@@ -48,6 +47,13 @@ fn parse_command(input: &str) -> IResult<&str, Command> {
 }
 
 pub fn sum_of_signal_strengths(input: &str) -> i32 {
+    let commands = input
+        .lines()
+        .map(Command::from_str)
+        .collect::<Result<Vec<_>, _>>();
+
+    dbg!(commands);
+
     todo!("Part 1")
 }
 
