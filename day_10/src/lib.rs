@@ -52,8 +52,7 @@ pub fn sum_of_signal_strengths(input: &str) -> i32 {
         .map(Command::from_str)
         .collect::<Result<Vec<_>, _>>();
 
-    dbg!(commands);
-
+    dbg!(commands.unwrap());
     todo!("Part 1")
 }
 
