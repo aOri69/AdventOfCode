@@ -1,5 +1,4 @@
 [workspace]
-
 members = [
     "day_1",
     "day_2",
@@ -12,6 +11,7 @@ members = [
     "day_9",
     "day_10",
 ]
+resolver = "2"
 
 [workspace.dependencies]
 color-eyre = "0.6.2"
