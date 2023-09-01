@@ -35,11 +35,8 @@ impl FromStr for Command {
 fn parse_command(input: &str) -> IResult<&str, Command> {
     // prepare separate parsers as variables closures
     let noop_parser = value(Command::Noop, tag("noop"));
-    let step_parser = map_res(recognize(preceded(opt(tag("-")), digit1)), |s| {
-        i32::from_str(s)
-    });
     let addx_parser = map(
-        separated_pair(tag("addx"), tag(" "), step_parser),
+        separated_pair(tag("addx"), tag(" "), nom::character::complete::i32),
         |(_addx, steps)| Command::Addx(steps),
     );
     // parse
@@ -51,8 +48,7 @@ pub fn sum_of_signal_strengths(input: &str) -> i32 {
         .lines()
         .map(Command::from_str)
         .collect::<Result<Vec<_>, _>>();
-
-    dbg!(commands.unwrap());
+    println!("{:?}", commands.unwrap());
     todo!("Part 1")
 }
 
@@ -61,10 +57,15 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_sum_of_signal_strengths() {
+    fn small_input_zero() {
+        use constants::TEST_SMALL;
+        let result = sum_of_signal_strengths(TEST_SMALL);
+        assert_eq!(result, 0i32);
+    }
+
+    #[test]
+    fn large_input_non_zero() {
         use constants::{TEST_LARGE, TEST_SMALL};
-        // let result = sum_of_signal_strengths(TEST_SMALL);
-        // assert_eq!(result, 0i32);
         let result = sum_of_signal_strengths(TEST_LARGE);
         assert_eq!(result, 13140i32);
     }
