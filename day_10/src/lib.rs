@@ -1,6 +1,6 @@
 #![allow(unused_imports, dead_code, unused_variables)]
 
-use std::str::FromStr;
+use std::{collections::VecDeque, str::FromStr};
 
 use nom::{
     branch::alt,
@@ -16,6 +16,15 @@ use nom::{
 enum Command {
     Noop,
     Addx(i32),
+}
+
+impl Command {
+    fn cycles(&self) -> u32 {
+        match self {
+            Command::Noop => 1,
+            Command::Addx(_) => 2,
+        }
+    }
 }
 
 impl FromStr for Command {
@@ -43,13 +52,80 @@ fn parse_command(input: &str) -> IResult<&str, Command> {
     alt((noop_parser, addx_parser))(input)
 }
 
+#[derive(Default)]
+struct Cpu {
+    cycle: u32,
+    reg_x: i32,
+    current_command: Option<Command>,
+    ticks_used: u32,
+}
+
+impl Cpu {
+    fn tick(&mut self) {
+        self.cycle += 1;
+
+        if let Some(command) = self.current_command {
+            self.ticks_used += 1;
+            if self.ticks_used == command.cycles() {
+                if let Command::Addx(x) = command {
+                    self.reg_x += x;
+                }
+                self.set_current_command(None);
+            }
+        }
+    }
+
+    fn set_current_command(&mut self, command: Option<Command>) {
+        self.ticks_used = 0;
+        match command {
+            Some(command) => self.current_command = Some(command),
+            None => self.current_command = None,
+        }
+    }
+
+    fn reg_x(&self) -> i32 {
+        self.reg_x
+    }
+
+    fn cycle(&self) -> u32 {
+        self.cycle
+    }
+}
+
 pub fn sum_of_signal_strengths(input: &str) -> i32 {
-    let commands = input
+    // 20th, 60th, 100th, 140th, 180th, and 220th cycles
+    const MULT_CYCLES: [u32; 6] = [20, 60, 100, 140, 180, 220];
+    let mut commands = input
         .lines()
         .map(Command::from_str)
-        .collect::<Result<Vec<_>, _>>();
-    println!("{:?}", commands.unwrap());
-    todo!("Part 1")
+        .collect::<Result<VecDeque<_>, _>>()
+        .unwrap();
+
+    let mut cpu = Cpu::default();
+    let mut res: i32 = 0;
+
+    loop {
+        if cpu.current_command.is_none() {
+            cpu.set_current_command(commands.pop_front());
+        }
+
+        cpu.tick();
+
+        if MULT_CYCLES.contains(&cpu.cycle) {
+            dbg!(cpu.cycle());
+            dbg!(cpu.reg_x());
+            dbg!(cpu.cycle() as i32 * cpu.reg_x());
+            dbg!(res);
+            res += cpu.cycle() as i32 * cpu.reg_x();
+            dbg!(res);
+            // Reached the end of the cycles array
+            if cpu.cycle() == *MULT_CYCLES.last().unwrap() {
+                break;
+            }
+        }
+    }
+
+    res
 }
 
 #[cfg(test)]
