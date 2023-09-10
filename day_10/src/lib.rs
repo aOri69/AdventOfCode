@@ -52,7 +52,6 @@ fn parse_command(input: &str) -> IResult<&str, Command> {
     alt((noop_parser, addx_parser))(input)
 }
 
-#[derive(Default)]
 struct Cpu {
     cycle: u32,
     reg_x: i32,
@@ -60,15 +59,26 @@ struct Cpu {
     ticks_used: u32,
 }
 
+impl Default for Cpu {
+    fn default() -> Self {
+        Self {
+            cycle: Default::default(),
+            reg_x: 1,
+            current_command: Default::default(),
+            ticks_used: Default::default(),
+        }
+    }
+}
+
 impl Cpu {
     fn tick(&mut self) {
         self.cycle += 1;
-
         if let Some(command) = self.current_command {
             self.ticks_used += 1;
             if self.ticks_used == command.cycles() {
-                if let Command::Addx(x) = command {
-                    self.reg_x += x;
+                match command {
+                    Command::Noop => (),
+                    Command::Addx(x) => self.reg_x += x,
                 }
                 self.set_current_command(None);
             }
@@ -90,6 +100,10 @@ impl Cpu {
     fn cycle(&self) -> u32 {
         self.cycle
     }
+
+    fn signal_strength(&self) -> i32 {
+        self.cycle() as i32 * self.reg_x()
+    }
 }
 
 pub fn sum_of_signal_strengths(input: &str) -> i32 {
@@ -100,28 +114,31 @@ pub fn sum_of_signal_strengths(input: &str) -> i32 {
         .map(Command::from_str)
         .collect::<Result<VecDeque<_>, _>>()
         .unwrap();
-
     let mut cpu = Cpu::default();
     let mut res: i32 = 0;
 
     loop {
-        if cpu.current_command.is_none() {
-            cpu.set_current_command(commands.pop_front());
+        if MULT_CYCLES.contains(&cpu.cycle()) {
+            let sig_str = cpu.signal_strength();
+            res += sig_str;
+        }
+        // Reached the end of the cycles array
+        if MULT_CYCLES
+            .last()
+            .is_some_and(|&cycle| cycle == cpu.cycle())
+        {
+            break;
+        }
+        // Reached the end of the commands deque
+        if commands.is_empty() {
+            break;
         }
 
+        // Main CPU cycle
         cpu.tick();
-
-        if MULT_CYCLES.contains(&cpu.cycle) {
-            dbg!(cpu.cycle());
-            dbg!(cpu.reg_x());
-            dbg!(cpu.cycle() as i32 * cpu.reg_x());
-            dbg!(res);
-            res += cpu.cycle() as i32 * cpu.reg_x();
-            dbg!(res);
-            // Reached the end of the cycles array
-            if cpu.cycle() == *MULT_CYCLES.last().unwrap() {
-                break;
-            }
+        // Check whether command was completed
+        if cpu.current_command.is_none() {
+            cpu.set_current_command(commands.pop_front());
         }
     }
 
