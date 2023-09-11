@@ -1,117 +1,17 @@
 #![allow(unused_imports, dead_code, unused_variables)]
 
-use std::{collections::VecDeque, str::FromStr};
+use std::collections::VecDeque;
+use std::str::FromStr;
 
-use nom::{
-    branch::alt,
-    bytes::complete::tag,
-    character::complete::digit1,
-    combinator::{map, map_res, opt, recognize, value},
-    error::Error,
-    sequence::{preceded, separated_pair},
-    Finish, IResult,
-};
-
-#[derive(Debug, Clone, Copy)]
-enum Command {
-    Noop,
-    Addx(i32),
-}
-
-impl Command {
-    fn cycles(&self) -> u32 {
-        match self {
-            Command::Noop => 1,
-            Command::Addx(_) => 2,
-        }
-    }
-}
-
-impl FromStr for Command {
-    type Err = Error<String>;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match parse_command(s).finish() {
-            Ok((_remaining, command)) => Ok(command),
-            Err(Error { input, code }) => Err(Error {
-                input: input.to_string(),
-                code,
-            }),
-        }
-    }
-}
-
-fn parse_command(input: &str) -> IResult<&str, Command> {
-    // prepare separate parsers as variables closures
-    let noop_parser = value(Command::Noop, tag("noop"));
-    let addx_parser = map(
-        separated_pair(tag("addx"), tag(" "), nom::character::complete::i32),
-        |(_addx, steps)| Command::Addx(steps),
-    );
-    // parse
-    alt((noop_parser, addx_parser))(input)
-}
-
-struct Cpu {
-    cycle: u32,
-    reg_x: i32,
-    current_command: Option<Command>,
-    ticks_used: u32,
-}
-
-impl Default for Cpu {
-    fn default() -> Self {
-        Self {
-            cycle: Default::default(),
-            reg_x: 1,
-            current_command: Default::default(),
-            ticks_used: Default::default(),
-        }
-    }
-}
-
-impl Cpu {
-    fn tick(&mut self) {
-        self.cycle += 1;
-        if let Some(command) = self.current_command {
-            self.ticks_used += 1;
-            if self.ticks_used == command.cycles() {
-                match command {
-                    Command::Noop => (),
-                    Command::Addx(x) => self.reg_x += x,
-                }
-                self.set_current_command(None);
-            }
-        }
-    }
-
-    fn set_current_command(&mut self, command: Option<Command>) {
-        self.ticks_used = 0;
-        match command {
-            Some(command) => self.current_command = Some(command),
-            None => self.current_command = None,
-        }
-    }
-
-    fn reg_x(&self) -> i32 {
-        self.reg_x
-    }
-
-    fn cycle(&self) -> u32 {
-        self.cycle
-    }
-
-    fn signal_strength(&self) -> i32 {
-        self.cycle() as i32 * self.reg_x()
-    }
-}
+mod cpu;
+use cpu::{Cpu, Instruction};
 
 pub fn sum_of_signal_strengths(input: &str) -> i32 {
     // 20th, 60th, 100th, 140th, 180th, and 220th cycles
     const MULT_CYCLES: [u32; 6] = [20, 60, 100, 140, 180, 220];
     let mut commands = input
         .lines()
-        .map(Command::from_str)
+        .map(Instruction::from_str)
         .collect::<Result<VecDeque<_>, _>>()
         .unwrap();
     let mut cpu = Cpu::default();
@@ -137,17 +37,54 @@ pub fn sum_of_signal_strengths(input: &str) -> i32 {
         // Main CPU cycle
         cpu.tick();
         // Check whether command was completed
-        if cpu.current_command.is_none() {
-            cpu.set_current_command(commands.pop_front());
+        if cpu.current_command().is_none() {
+            cpu.set_command(commands.pop_front());
         }
     }
 
     res
 }
 
+const CRT_WIDTH: usize = 40;
+const CRT_HEIGHT: usize = 6;
+struct Crt {
+    pixels: [[char; CRT_WIDTH]; CRT_HEIGHT],
+}
+
+impl Default for Crt {
+    fn default() -> Self {
+        Self {
+            pixels: [['.'; CRT_WIDTH]; CRT_HEIGHT],
+        }
+    }
+}
+
+pub fn draw_crt(input: &str) {
+    let mut crt = Crt::default();
+    let mut commands = input
+        .lines()
+        .map(Instruction::from_str)
+        .collect::<Result<VecDeque<_>, _>>()
+        .unwrap();
+    let mut cpu = Cpu::default();
+
+    loop {
+        if commands.is_empty() {
+            break;
+        }
+
+        // Main CPU cycle
+        cpu.tick();
+        if cpu.current_command().is_none() {
+            cpu.set_command(commands.pop_front());
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn small_input_zero() {
@@ -158,9 +95,74 @@ mod tests {
 
     #[test]
     fn large_input_non_zero() {
-        use constants::{TEST_LARGE, TEST_SMALL};
+        use constants::TEST_LARGE;
         let result = sum_of_signal_strengths(TEST_LARGE);
         assert_eq!(result, 13140i32);
+    }
+
+    fn sprite_value(pos: i32) -> u64 {
+        // FIX-ME
+        const DISPLAY_MASK: u64 = 0b1111111111111111111111111111111111111111;
+        const SPRITE: u64 = 0b1110000000000000000000000000000000000000;
+
+        let (shifted_sprite, _) = match pos {
+            pos if pos < 0 => SPRITE.overflowing_shl(pos.abs().try_into().unwrap()),
+            pos => SPRITE.overflowing_shr(pos.try_into().unwrap()),
+        };
+
+        shifted_sprite & DISPLAY_MASK
+
+        // let res = (SPRITE >> (pos - 1)) & DISPLAY_MASK;
+        // let s = format!("{:040b}", res);
+        // res
+    }
+
+    #[test]
+    fn test_sprite_value_minus_1() {
+        assert_eq!(
+            format!("{:040b}", sprite_value(-1)),
+            "1000000000000000000000000000000000000000"
+        );
+    }
+
+    #[test]
+    fn test_sprite_value_0() {
+        assert_eq!(
+            format!("{:040b}", sprite_value(0)),
+            "1100000000000000000000000000000000000000"
+        );
+    }
+
+    #[test]
+    fn test_sprite_value_1() {
+        assert_eq!(
+            format!("{:040b}", sprite_value(1)),
+            "1110000000000000000000000000000000000000"
+        );
+    }
+
+    #[test]
+    fn test_sprite_value_38() {
+        assert_eq!(
+            format!("{:040b}", sprite_value(38)),
+            "0000000000000000000000000000000000000111"
+        );
+    }
+
+    #[test]
+    fn test_sprite_value_39() {
+        assert_eq!(
+            format!("{:040b}", sprite_value(39)),
+            "0000000000000000000000000000000000000011"
+        );
+    }
+
+    #[test]
+    fn test_sprite_value_40() {
+        assert_eq!(
+            format!("{:040b}", sprite_value(40)),
+            "0000000000000000000000000000000000000001"
+        );
     }
 
     mod constants {
@@ -316,5 +318,11 @@ noop
 noop
 noop
 ";
+        pub const CRT_LARGE: &str = "##..##..##..##..##..##..##..##..##..##..
+###...###...###...###...###...###...###.
+####....####....####....####....####....
+#####.....#####.....#####.....#####.....
+######......######......######......####
+#######.......#######.......#######.....";
     }
 }
