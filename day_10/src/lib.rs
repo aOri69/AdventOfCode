@@ -1,4 +1,4 @@
-#![allow(unused_imports, dead_code, unused_variables)]
+#![allow(unused_imports, dead_code, unused_variables, unused_mut)]
 
 use std::collections::VecDeque;
 use std::str::FromStr;
@@ -59,6 +59,23 @@ impl Default for Crt {
     }
 }
 
+impl Crt {
+    fn sprite_value(pos: i32) -> u64 {
+        const DISPLAY_MASK: u64 = 0b1111111111111111111111111111111111111111;
+        const SPRITE: u64 = 0b1110000000000000000000000000000000000000;
+
+        let (shifted_sprite, _left) = if pos <= 0 {
+            let shift = -(pos - 1);
+            SPRITE.overflowing_shl(shift.try_into().unwrap())
+        } else {
+            let shift = pos - 1;
+            SPRITE.overflowing_shr(shift.try_into().unwrap())
+        };
+
+        shifted_sprite & DISPLAY_MASK
+    }
+}
+
 pub fn draw_crt(input: &str) {
     let mut crt = Crt::default();
     let mut commands = input
@@ -86,83 +103,75 @@ mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
 
-    #[test]
-    fn small_input_zero() {
-        use constants::TEST_SMALL;
-        let result = sum_of_signal_strengths(TEST_SMALL);
-        assert_eq!(result, 0i32);
+    mod main {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn small_input_zero() {
+            use constants::TEST_SMALL;
+            let result = sum_of_signal_strengths(TEST_SMALL);
+            assert_eq!(result, 0i32);
+        }
+
+        #[test]
+        fn large_input_non_zero() {
+            use constants::TEST_LARGE;
+            let result = sum_of_signal_strengths(TEST_LARGE);
+            assert_eq!(result, 13140i32);
+        }
     }
+    mod binary {
+        use super::*;
+        use pretty_assertions::assert_eq;
 
-    #[test]
-    fn large_input_non_zero() {
-        use constants::TEST_LARGE;
-        let result = sum_of_signal_strengths(TEST_LARGE);
-        assert_eq!(result, 13140i32);
-    }
+        #[test]
+        fn test_sprite_value_minus_1() {
+            assert_eq!(
+                format!("{:040b}", Crt::sprite_value(-1)),
+                "1000000000000000000000000000000000000000"
+            );
+        }
 
-    fn sprite_value(pos: i32) -> u64 {
-        // FIX-ME
-        const DISPLAY_MASK: u64 = 0b1111111111111111111111111111111111111111;
-        const SPRITE: u64 = 0b1110000000000000000000000000000000000000;
+        #[test]
+        fn test_sprite_value_0() {
+            assert_eq!(
+                format!("{:040b}", Crt::sprite_value(0)),
+                "1100000000000000000000000000000000000000"
+            );
+        }
 
-        let (shifted_sprite, _) = match pos {
-            pos if pos < 0 => SPRITE.overflowing_shl(pos.abs().try_into().unwrap()),
-            pos => SPRITE.overflowing_shr(pos.try_into().unwrap()),
-        };
+        #[test]
+        fn test_sprite_value_1() {
+            assert_eq!(
+                format!("{:040b}", Crt::sprite_value(1)),
+                "1110000000000000000000000000000000000000"
+            );
+        }
 
-        shifted_sprite & DISPLAY_MASK
+        #[test]
+        fn test_sprite_value_38() {
+            assert_eq!(
+                format!("{:040b}", Crt::sprite_value(38)),
+                "0000000000000000000000000000000000000111"
+            );
+        }
 
-        // let res = (SPRITE >> (pos - 1)) & DISPLAY_MASK;
-        // let s = format!("{:040b}", res);
-        // res
-    }
+        #[test]
+        fn test_sprite_value_39() {
+            assert_eq!(
+                format!("{:040b}", Crt::sprite_value(39)),
+                "0000000000000000000000000000000000000011"
+            );
+        }
 
-    #[test]
-    fn test_sprite_value_minus_1() {
-        assert_eq!(
-            format!("{:040b}", sprite_value(-1)),
-            "1000000000000000000000000000000000000000"
-        );
-    }
-
-    #[test]
-    fn test_sprite_value_0() {
-        assert_eq!(
-            format!("{:040b}", sprite_value(0)),
-            "1100000000000000000000000000000000000000"
-        );
-    }
-
-    #[test]
-    fn test_sprite_value_1() {
-        assert_eq!(
-            format!("{:040b}", sprite_value(1)),
-            "1110000000000000000000000000000000000000"
-        );
-    }
-
-    #[test]
-    fn test_sprite_value_38() {
-        assert_eq!(
-            format!("{:040b}", sprite_value(38)),
-            "0000000000000000000000000000000000000111"
-        );
-    }
-
-    #[test]
-    fn test_sprite_value_39() {
-        assert_eq!(
-            format!("{:040b}", sprite_value(39)),
-            "0000000000000000000000000000000000000011"
-        );
-    }
-
-    #[test]
-    fn test_sprite_value_40() {
-        assert_eq!(
-            format!("{:040b}", sprite_value(40)),
-            "0000000000000000000000000000000000000001"
-        );
+        #[test]
+        fn test_sprite_value_40() {
+            assert_eq!(
+                format!("{:040b}", Crt::sprite_value(40)),
+                "0000000000000000000000000000000000000001"
+            );
+        }
     }
 
     mod constants {
