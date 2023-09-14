@@ -45,39 +45,28 @@ pub fn sum_of_signal_strengths(input: &str) -> i32 {
     res
 }
 
-const CRT_WIDTH: usize = 40;
-const CRT_HEIGHT: usize = 6;
-struct Crt {
-    pixels: [[char; CRT_WIDTH]; CRT_HEIGHT],
+fn sprite_value(pos: i32) -> u64 {
+    const DISPLAY_MASK: u64 = 0b1111111111111111111111111111111111111111;
+    const SPRITE: u64 = 0b1110000000000000000000000000000000000000;
+
+    let (shifted_sprite, _left) = if pos <= 0 {
+        let shift = -(pos - 1);
+        SPRITE.overflowing_shl(shift.try_into().unwrap())
+    } else {
+        let shift = pos - 1;
+        SPRITE.overflowing_shr(shift.try_into().unwrap())
+    };
+
+    shifted_sprite & DISPLAY_MASK
 }
 
-impl Default for Crt {
-    fn default() -> Self {
-        Self {
-            pixels: [['.'; CRT_WIDTH]; CRT_HEIGHT],
-        }
-    }
-}
+pub fn draw_crt(input: &str) -> Vec<String> {
+    const CRT_WIDTH: usize = 40;
+    const CRT_HEIGHT: usize = 6;
+    const CRT_PIXEL: char = '#';
+    const CRT_DOT: char = '.';
 
-impl Crt {
-    fn sprite_value(pos: i32) -> u64 {
-        const DISPLAY_MASK: u64 = 0b1111111111111111111111111111111111111111;
-        const SPRITE: u64 = 0b1110000000000000000000000000000000000000;
-
-        let (shifted_sprite, _left) = if pos <= 0 {
-            let shift = -(pos - 1);
-            SPRITE.overflowing_shl(shift.try_into().unwrap())
-        } else {
-            let shift = pos - 1;
-            SPRITE.overflowing_shr(shift.try_into().unwrap())
-        };
-
-        shifted_sprite & DISPLAY_MASK
-    }
-}
-
-pub fn draw_crt(input: &str) {
-    let mut crt = Crt::default();
+    let mut crt_pixels: [[char; CRT_WIDTH]; CRT_HEIGHT] = [[CRT_DOT; CRT_WIDTH]; CRT_HEIGHT];
     let mut commands = input
         .lines()
         .map(Instruction::from_str)
@@ -86,16 +75,35 @@ pub fn draw_crt(input: &str) {
     let mut cpu = Cpu::default();
 
     loop {
-        if commands.is_empty() {
-            break;
-        }
+        let crt_line_idx = cpu.cycle() as usize / CRT_WIDTH;
+        let crt_pixel_idx = cpu.cycle() as usize - crt_line_idx * CRT_WIDTH;
 
+        let crt_pixel = &mut crt_pixels[crt_line_idx][crt_pixel_idx];
+        let sprite_position: [i32; 3] = [
+            crt_pixel_idx as i32 - 1,
+            crt_pixel_idx as i32,
+            crt_pixel_idx as i32 + 1,
+        ];
         // Main CPU cycle
         cpu.tick();
         if cpu.current_command().is_none() {
             cpu.set_command(commands.pop_front());
         }
+
+        if sprite_position.contains(&cpu.reg_x()) {
+            *crt_pixel = '#';
+        }
+
+        // Reached the end of commands list
+        if commands.is_empty() {
+            break;
+        }
     }
+
+    crt_pixels
+        .into_iter() // iterator over arrays of char40
+        .map(String::from_iter) // char40 array to string
+        .collect::<Vec<String>>()
 }
 
 #[cfg(test)]
@@ -104,6 +112,8 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     mod main {
+        use crate::tests::constants::CRT_LARGE;
+
         use super::*;
         use pretty_assertions::assert_eq;
 
@@ -120,15 +130,43 @@ mod tests {
             let result = sum_of_signal_strengths(TEST_LARGE);
             assert_eq!(result, 13140i32);
         }
+
+        #[test]
+        fn large_crt() {
+            use constants::{CRT_LARGE, TEST_LARGE};
+            let result = draw_crt(TEST_LARGE);
+            assert_eq!(result, CRT_LARGE.lines().collect::<Vec<_>>());
+        }
+
+        #[test]
+        fn part_1() {
+            let input = include_str!("../input.txt");
+            let result = sum_of_signal_strengths(input);
+            assert_eq!(result, 14820i32);
+        }
+
+        #[test]
+        fn part_2() {
+            let input = include_str!("../input.txt");
+            let expected: Vec<String> = vec![];
+            let result = draw_crt(input);
+            assert_eq!(
+                result,
+                CRT_PART_2_ANSWER_RZEKEFHA
+                    .lines()
+                    .to_owned()
+                    .collect::<Vec<_>>()
+            );
+        }
     }
-    mod binary {
+    mod bitwise {
         use super::*;
         use pretty_assertions::assert_eq;
 
         #[test]
         fn test_sprite_value_minus_1() {
             assert_eq!(
-                format!("{:040b}", Crt::sprite_value(-1)),
+                format!("{:040b}", sprite_value(-1)),
                 "1000000000000000000000000000000000000000"
             );
         }
@@ -136,7 +174,7 @@ mod tests {
         #[test]
         fn test_sprite_value_0() {
             assert_eq!(
-                format!("{:040b}", Crt::sprite_value(0)),
+                format!("{:040b}", sprite_value(0)),
                 "1100000000000000000000000000000000000000"
             );
         }
@@ -144,7 +182,7 @@ mod tests {
         #[test]
         fn test_sprite_value_1() {
             assert_eq!(
-                format!("{:040b}", Crt::sprite_value(1)),
+                format!("{:040b}", sprite_value(1)),
                 "1110000000000000000000000000000000000000"
             );
         }
@@ -152,7 +190,7 @@ mod tests {
         #[test]
         fn test_sprite_value_38() {
             assert_eq!(
-                format!("{:040b}", Crt::sprite_value(38)),
+                format!("{:040b}", sprite_value(38)),
                 "0000000000000000000000000000000000000111"
             );
         }
@@ -160,7 +198,7 @@ mod tests {
         #[test]
         fn test_sprite_value_39() {
             assert_eq!(
-                format!("{:040b}", Crt::sprite_value(39)),
+                format!("{:040b}", sprite_value(39)),
                 "0000000000000000000000000000000000000011"
             );
         }
@@ -168,7 +206,7 @@ mod tests {
         #[test]
         fn test_sprite_value_40() {
             assert_eq!(
-                format!("{:040b}", Crt::sprite_value(40)),
+                format!("{:040b}", sprite_value(40)),
                 "0000000000000000000000000000000000000001"
             );
         }
@@ -334,4 +372,11 @@ noop
 ######......######......######......####
 #######.......#######.......#######.....";
     }
+
+    pub const CRT_PART_2_ANSWER_RZEKEFHA: &str = "###..####.####.#..#.####.####.#..#..##..
+#..#....#.#....#.#..#....#....#..#.#..#.
+#..#...#..###..##...###..###..####.#..#.
+###...#...#....#.#..#....#....#..#.####.
+#.#..#....#....#.#..#....#....#..#.#..#.
+#..#.####.####.#..#.####.#....#..#.#..#.";
 }

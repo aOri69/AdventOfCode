@@ -1,7 +1,7 @@
-use cathode_ray_tube::sum_of_signal_strengths;
+use cathode_ray_tube::{draw_crt, sum_of_signal_strengths};
 
 fn main() {
     let input = include_str!("../input.txt");
-    let result = sum_of_signal_strengths(input);
-    println!("Part 1: {result}");
+    println!("Part 1: {}", sum_of_signal_strengths(&input));
+    println!("Part 2:\n{}", draw_crt(&input).join("\n"));
 }
