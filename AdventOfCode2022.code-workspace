@@ -17,7 +17,6 @@
 			"editor.defaultFormatter": "rust-lang.rust-analyzer",
 			"editor.formatOnSave": true
 		},
-		"rust-analyzer.check.command": "clippy",
 		"rust-analyzer.inlayHints.bindingModeHints.enable": true,
 		"rust-analyzer.inlayHints.closureCaptureHints.enable": true,
 		"rust-analyzer.inlayHints.maxLength": null,
