@@ -201,8 +201,6 @@ Find the signal strength during the 20th, 60th, 100th, 140th, 180th, and 220th c
 
 Your puzzle answer was `14820`.
 
-The first half of this puzzle is complete! It provides one gold star: \*
-
 ## \--- Part Two ---
 
 It seems like the `X` register controls the horizontal position of a [sprite](https://en.wikipedia.org/wiki/Sprite_(computer_graphics)). Specifically, the sprite is 3 pixels wide, and the `X` register sets the horizontal position of the _middle_ of that sprite. (In this system, there is no such thing as "vertical position": if the sprite's horizontal position puts its pixels where the CRT is currently drawing, then those pixels will be drawn.)
@@ -336,6 +334,12 @@ Allowing the program to run to completion causes the CRT to produce the followin
 
 Render the image given by your program. _What eight capital letters appear on your CRT?_
 
-Although it hasn't changed, you can still [get your puzzle input](https://adventofcode.com/2022/day/10/input).
+Your puzzle answer was `RZEKEFHA`.
+
+Both parts of this puzzle are complete! They provide two gold stars: \*\*
+
+At this point, you should [return to your Advent calendar](https://adventofcode.com/2022) and try another puzzle.
+
+If you still want to see it, you can [get your puzzle input](https://adventofcode.com/2022/day/10/input).
 
 You can also this puzzle.
