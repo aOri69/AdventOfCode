@@ -45,6 +45,7 @@ pub fn sum_of_signal_strengths(input: &str) -> i32 {
     res
 }
 
+#[allow(dead_code)]
 fn sprite_value(pos: i32) -> u64 {
     const DISPLAY_MASK: u64 = 0b1111111111111111111111111111111111111111;
     const SPRITE: u64 = 0b1110000000000000000000000000000000000000;
@@ -91,7 +92,7 @@ pub fn draw_crt(input: &str) -> Vec<String> {
         }
 
         if sprite_position.contains(&cpu.reg_x()) {
-            *crt_pixel = '#';
+            *crt_pixel = CRT_PIXEL;
         }
 
         // Reached the end of commands list
@@ -106,13 +107,13 @@ pub fn draw_crt(input: &str) -> Vec<String> {
         .collect::<Vec<String>>()
 }
 
+#[allow(unused_imports)]
 #[cfg(test)]
 mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
 
     mod main {
-        use crate::tests::constants::CRT_LARGE;
 
         use super::*;
         use pretty_assertions::assert_eq;
@@ -148,7 +149,6 @@ mod tests {
         #[test]
         fn part_2() {
             let input = include_str!("../input.txt");
-            let expected: Vec<String> = vec![];
             let result = draw_crt(input);
             assert_eq!(
                 result,
