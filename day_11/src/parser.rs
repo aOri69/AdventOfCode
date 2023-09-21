@@ -19,12 +19,9 @@ pub fn parse_monkeys(input: &str) -> Vec<Monkey> {
 }
 
 pub fn parse_items(input: &str) -> IResult<&str, Items> {
-    let mut items_parser = terminated(
-        preceded(
-            tag("  Starting items: "),
-            separated_list0(tag(", "), map(nom::character::complete::u32, Item::from)),
-        ),
-        line_ending,
+    let mut items_parser = preceded(
+        tag("  Starting items: "),
+        separated_list0(tag(", "), map(nom::character::complete::u32, Item::from)),
     );
 
     items_parser(input)
@@ -37,7 +34,7 @@ mod tests {
 
     #[test]
     fn starting_items_empty() {
-        const STARTING_ITEMS_EMPTY: &str = "  Starting items: \r\n";
+        const STARTING_ITEMS_EMPTY: &str = "  Starting items: ";
         let expected: Vec<Item> = vec![];
         let (_remaining, result) = parse_items(STARTING_ITEMS_EMPTY).finish().unwrap();
         assert_eq!(expected, result);
@@ -45,7 +42,8 @@ mod tests {
 
     #[test]
     fn starting_items_non_empty() {
-        const STARTING_ITEMS: &str = "  Starting items: 54, 65, 75, 74\r\n";
+        const STARTING_ITEMS: &str = "  Starting items: 54, 65, 75, 74";
+        const STARTING_ITEMS_CRLF: &str = "  Starting items: 54, 65, 75, 74\r\n";
         let expected = vec![
             Item::from(54),
             Item::from(65),
@@ -53,6 +51,9 @@ mod tests {
             Item::from(74),
         ];
         let (_remaining, result) = parse_items(STARTING_ITEMS).finish().unwrap();
+        assert_eq!(expected, result);
+
+        let (_remaining, result) = parse_items(STARTING_ITEMS_CRLF).finish().unwrap();
         assert_eq!(expected, result);
     }
 }
