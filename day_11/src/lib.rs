@@ -1,35 +1,7 @@
-#![allow(unused_variables, dead_code)]
+#![allow(unused)]
 
-use std::str::FromStr;
-
-#[derive(Debug, Default, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
-struct Item(u32);
-
-#[derive(Debug, Default, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
-struct Test {
-    divide_by: i32,
-    throw_if_true_to: u32,
-    throw_if_false_to: u32,
-}
-
-#[derive(Debug, Default, PartialEq, Eq, PartialOrd, Ord, Clone)]
-struct Monkey {
-    items: Vec<Item>,
-    mult_operation: i32,
-    test: Test,
-}
-
-impl FromStr for Monkey {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Err("not implemented".to_owned())
-    }
-}
-
-fn parse_monkeys(input: &str) -> Vec<Monkey> {
-    vec![Monkey::default()]
-}
+mod monkey;
+mod parser;
 
 #[cfg(test)]
 mod tests {
@@ -38,26 +10,8 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     #[test]
-    fn parse_1_monkey() {
-        let expected = Monkey {
-            items: vec![Item(1), Item(2), Item(3), Item(4), Item(5)],
-            mult_operation: 2,
-            test: Test {
-                divide_by: 2,
-                throw_if_true_to: 1,
-                throw_if_false_to: 2,
-            },
-        };
-        let result = Monkey::from_str(GENERIC_MONKEY);
-
-        assert_eq!(Ok(expected), result);
-    }
-
-    #[test]
-    fn parse_4_monkeys() {
-        let expected = vec![];
-        let result = parse_monkeys(MONKEY_INPUT);
-        assert_eq!(result, expected);
+    fn parse_smthng() {
+        todo!()
     }
 
     mod constants {
