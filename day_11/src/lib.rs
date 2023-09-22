@@ -1,7 +1,6 @@
-#![allow(unused)]
+#![allow(unused_variables)]
 
 mod monkey;
-mod parser;
 
 #[cfg(test)]
 mod tests {
