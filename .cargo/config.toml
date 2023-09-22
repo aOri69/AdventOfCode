@@ -1,0 +1,4 @@
+[env]
+# CARGO_LOG = "info"
+RUST_LOG = "debug"
+RUST_BACKTRACE = "0"
