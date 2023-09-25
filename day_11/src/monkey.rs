@@ -1,6 +1,6 @@
 mod parser;
 mod utils;
-use std::{rc::Rc, str::FromStr};
+use std::str::FromStr;
 
 pub use self::utils::{Item, Operation, Test};
 

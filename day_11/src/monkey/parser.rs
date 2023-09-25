@@ -1,13 +1,13 @@
 use nom::{
     bytes::complete::tag,
-    character::complete::{one_of, space1},
+    character::complete::{line_ending, one_of, space1},
     combinator::{map, map_res},
     multi::separated_list0,
-    sequence::{preceded, separated_pair},
+    sequence::{preceded, separated_pair, terminated, tuple},
     Finish, IResult,
 };
 
-use super::{Item, Items, Operation};
+use super::{Item, Items, Operation, Test};
 
 pub fn parse_items(input: &str) -> IResult<&str, Items> {
     let mut items_parser = preceded(
@@ -28,6 +28,36 @@ pub fn parse_operation(input: &str) -> IResult<&str, Operation> {
     );
 
     parser(input)
+}
+
+pub fn parse_test(input: &str) -> IResult<&str, Test> {
+    let divisible_by = terminated(
+        preceded(tag("  Test: divisible by "), nom::character::complete::i32),
+        line_ending,
+    );
+    let if_true_throw_to = terminated(
+        preceded(
+            tag("    If true: throw to monkey "),
+            nom::character::complete::i32,
+        ),
+        line_ending,
+    );
+    let if_false_throw_to = terminated(
+        preceded(
+            tag("    If false: throw to monkey "),
+            nom::character::complete::i32,
+        ),
+        line_ending,
+    );
+
+    map_res(
+        tuple((divisible_by, if_true_throw_to, if_false_throw_to)),
+        |(divisible_by, if_true_throw_to, if_false_throw_to)| {
+            let operation = Operation::try_from(('/', divisible_by))?;
+            // Shit here. better to implement in another way
+            Test::try_from((operation, if_true_throw_to, if_false_throw_to))
+        },
+    )(input)
 }
 
 #[cfg(test)]
@@ -66,7 +96,7 @@ mod tests {
     }
 
     #[cfg(test)]
-    mod operation {
+    mod operation_parser {
         use super::*;
         use pretty_assertions::assert_eq;
 
@@ -81,10 +111,54 @@ mod tests {
         }
 
         #[test]
+        fn multiply() {
+            const OPERATION_OK: &str = "  Operation: new = old * 3";
+            let expected: Operation = Operation::Multiply(3);
+            let (_remaining, result) = parse_operation(OPERATION_OK).finish().unwrap();
+            assert_eq!(expected, result);
+        }
+
+        #[test]
+        fn divide_ok() {
+            const OPERATION_OK: &str = "  Operation: new = old / 2";
+            let expected: Operation = Operation::Divide(2);
+            let (_remaining, result) = parse_operation(OPERATION_OK).finish().unwrap();
+            assert_eq!(expected, result);
+        }
+
+        #[test]
+        #[should_panic]
+        fn divide_fail() {
+            const OPERATION_OK: &str = "  Operation: new = old / 0";
+            let result = parse_operation(OPERATION_OK).finish().unwrap();
+        }
+
+        #[test]
         #[should_panic]
         fn add_fail() {
             const OPERATION_INVALID: &str = "  Operation: new = old / 0";
             let result = parse_operation(OPERATION_INVALID).finish().unwrap();
+        }
+    }
+
+    #[cfg(test)]
+    mod test_parser {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn simple() {
+            const TEST_OK: &str = "  Test: divisible by 2
+    If true: throw to monkey 1
+    If false: throw to monkey 2
+            ";
+            let expected: Test = Test {
+                operation: Operation::Divide(2),
+                if_true_throw_to: 1,
+                if_false_throw_to: 2,
+            };
+            let (_remaining, result) = parse_test(TEST_OK).finish().unwrap();
+            assert_eq!(expected, result);
         }
     }
 }

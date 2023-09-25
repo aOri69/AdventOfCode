@@ -1,8 +1,6 @@
-use std::{rc::Rc, str::FromStr};
+use std::str::FromStr;
 
 use thiserror::Error;
-
-use super::Monkey;
 
 pub trait Appliable {
     type ApplyResult;
@@ -67,8 +65,21 @@ impl TryFrom<(char, i32)> for Operation {
     }
 }
 
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Test {
     operation: Operation,
-    if_true_throw_to: Rc<Monkey>,
-    if_false_throw_to: Rc<Monkey>,
+    if_true_throw_to: i32,
+    if_false_throw_to: i32,
+}
+
+impl TryFrom<(Operation, i32, i32)> for Test {
+    type Error = OperationError;
+
+    fn try_from(value: (Operation, i32, i32)) -> Result<Self, Self::Error> {
+        Ok(Test {
+            operation: value.0,
+            if_true_throw_to: value.1,
+            if_false_throw_to: value.2,
+        })
+    }
 }
