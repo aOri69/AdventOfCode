@@ -1,31 +1,36 @@
-#![allow(unused_variables)]
+// #![allow(unused_variables)]
 
 mod monkey;
 
 #[cfg(test)]
 mod tests {
+    use crate::monkey::parse_monkeys;
+
     use super::*;
     use constants::*;
+    use nom::Finish;
     use pretty_assertions::assert_eq;
 
     #[test]
-    fn parse_smthng() {
+    fn multiple_monkeys_to_vec() {
+        let (_, result) = parse_monkeys(MONKEY_INPUT).finish().unwrap();
+        dbg!(result);
         todo!()
     }
 
     mod constants {
         pub const GENERIC_MONKEY: &str = "Monkey 0:
-Starting items: 1, 2, 3, 4, 5
-Operation: new = old * 2
-Test: divisible by 2
-  If true: throw to monkey 1
-  If false: throw to monkey 2";
+  Starting items: 1, 2, 3, 4, 5
+  Operation: new = old * 2
+  Test: divisible by 2
+    If true: throw to monkey 1
+    If false: throw to monkey 2";
         pub const MONKEY_INPUT: &str = "Monkey 0:
-Starting items: 79, 98
-Operation: new = old * 19
-Test: divisible by 23
-  If true: throw to monkey 2
-  If false: throw to monkey 3
+  Starting items: 79, 98
+  Operation: new = old * 19
+  Test: divisible by 23
+    If true: throw to monkey 2
+    If false: throw to monkey 3
 
 Monkey 1:
   Starting items: 54, 65, 75, 74
@@ -46,6 +51,7 @@ Monkey 3:
   Operation: new = old + 3
   Test: divisible by 17
     If true: throw to monkey 0
-    If false: throw to monkey 1";
+    If false: throw to monkey 1
+";
     }
 }
