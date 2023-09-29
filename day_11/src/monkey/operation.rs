@@ -39,6 +39,7 @@ impl std::str::FromStr for Operation {
     type Err = OperationError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (op, val) = s.split_at(1);
         todo!()
     }
 }

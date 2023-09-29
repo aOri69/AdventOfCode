@@ -4,9 +4,19 @@ mod monkey;
 
 #[cfg(test)]
 mod tests {
+    use crate::monkey::parse_monkeys;
+
     use super::*;
     use constants::*;
+    use nom::Finish;
     use pretty_assertions::assert_eq;
+
+    #[test]
+    fn monkeys_to_vec() {
+        let (_r, monkeys) = parse_monkeys(MONKEY_INPUT).finish().unwrap();
+        dbg!(monkeys);
+        todo!()
+    }
 
     mod constants {
         pub const GENERIC_MONKEY: &str = "Monkey 0:

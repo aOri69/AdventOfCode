@@ -8,7 +8,7 @@ use nom::{
     branch::alt,
     bytes::complete::{tag, take_until, take_while},
     character::{
-        complete::{alpha1, digit1, line_ending, one_of, space1},
+        complete::{alpha1, alphanumeric1, digit1, line_ending, one_of, space1},
         is_digit,
     },
     combinator::{all_consuming, map, map_res, opt},
@@ -74,7 +74,10 @@ pub fn parse_items(input: &str) -> IResult<&str, Items> {
 }
 
 pub fn parse_operation(input: &str) -> IResult<&str, Operation> {
-    todo!()
+    let (input, _) = preceded(space1, tag("Operation: new = old "))(input)?;
+    let (input, (op, val)) = separated_pair(one_of("+-*/"), tag(" "), alphanumeric1)(input)?;
+    todo!();
+    Ok((input, Operation::Add(2)))
 }
 
 pub fn parse_test(input: &str) -> IResult<&str, Test> {
