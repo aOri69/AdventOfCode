@@ -1,22 +1,12 @@
-// #![allow(unused_variables)]
+#![allow(unused)]
 
 mod monkey;
 
 #[cfg(test)]
 mod tests {
-    use crate::monkey::parse_monkeys;
-
     use super::*;
     use constants::*;
-    use nom::Finish;
     use pretty_assertions::assert_eq;
-
-    #[test]
-    fn multiple_monkeys_to_vec() {
-        let (_, result) = parse_monkeys(MONKEY_INPUT).finish().unwrap();
-        dbg!(result);
-        todo!()
-    }
 
     mod constants {
         pub const GENERIC_MONKEY: &str = "Monkey 0:
