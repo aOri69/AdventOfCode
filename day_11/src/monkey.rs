@@ -60,10 +60,12 @@ pub fn parse_items(input: &str) -> IResult<&str, Items> {
 
 pub fn parse_operation(input: &str) -> IResult<&str, Operation> {
     let (input, _) = preceded(space1, tag("Operation: new = old "))(input)?;
-    let (input, (op, val)) = separated_pair(one_of("+-*/"), tag(" "), alphanumeric1)(input)?;
-    dbg!(op, val);
-    let val = Value::from_str(val)?;
-    // Ok((input, Operation::Add(2.into())))
+    let (input, (operation, value)) =
+        separated_pair(one_of("+-*/"), tag(" "), alphanumeric1)(input)?;
+    // remove unwraps
+    let value = Value::from_str(value).unwrap();
+    let operation = Operation::new(operation, value).unwrap();
+    Ok((input, operation))
 }
 
 pub fn parse_test(input: &str) -> IResult<&str, Test> {
