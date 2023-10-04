@@ -8,24 +8,54 @@ pub enum OperationError {
     Unsupported(char),
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum ValueError {
+    #[error("unable to parse \"{0:?}\" as an arithmetic value")]
+    ParsingFailed(String),
+}
+
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Value {
+    Const(i32),
+    Old,
+}
+
+impl From<i32> for Value {
+    fn from(value: i32) -> Self {
+        Value::Const(value)
+    }
+}
+
+impl std::str::FromStr for Value {
+    type Err = ValueError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Ok(val) = s.parse::<i32>() {
+            return Ok(Self::Const(val));
+        }
+        if s == "old" {
+            return Ok(Self::Old);
+        }
+        Err(ValueError::ParsingFailed(s.to_owned()))
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Operation {
-    Multiply(i32),
-    Power(i32),
-    Divide(i32),
-    Add(i32),
-    Subtract(i32),
+    Multiply(Value),
+    Divide(Value),
+    Add(Value),
+    Subtract(Value),
 }
 
 impl Operation {
-    pub fn new(operation: char, value: i32) -> Result<Self, OperationError> {
+    pub fn new(operation: char, value: Value) -> Result<Self, OperationError> {
         match operation {
             '+' => Ok(Self::Add(value)),
             '-' => Ok(Self::Subtract(value)),
             '*' => Ok(Self::Multiply(value)),
-            '^' => Ok(Self::Power(value)),
             '/' => {
-                if value == 0 {
+                if value == Value::Const(0) {
                     return Err(OperationError::ZeroDivision);
                 }
                 Ok(Self::Divide(value))

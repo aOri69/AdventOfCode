@@ -3,6 +3,8 @@ mod operation;
 mod parser;
 mod test;
 
+use std::str::FromStr;
+
 pub use item::Item;
 use nom::{
     branch::alt,
@@ -16,7 +18,7 @@ use nom::{
     sequence::{delimited, preceded, separated_pair, terminated, tuple},
     IResult,
 };
-pub use operation::{Operation, OperationError};
+pub use operation::{Operation, OperationError, Value, ValueError};
 pub use test::Test;
 
 pub type Monkeys = Vec<Monkey>;
@@ -47,23 +49,6 @@ pub enum MonkeyError {
     InvalidOperation(#[from] OperationError),
 }
 
-impl std::str::FromStr for Monkey {
-    type Err = MonkeyError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        // use nom::error::Error;
-
-        // match parse_monkey(s).finish() {
-        //     Ok((_remaining, monkey)) => Ok(monkey),
-        //     Err(Error { input, code }) => Err(Error {
-        //         input: input.to_string(),
-        //         code,
-        //     }),
-        // }
-        todo!()
-    }
-}
-
 pub fn parse_items(input: &str) -> IResult<&str, Items> {
     let mut items_parser = preceded(
         tag("  Starting items: "),
@@ -76,8 +61,9 @@ pub fn parse_items(input: &str) -> IResult<&str, Items> {
 pub fn parse_operation(input: &str) -> IResult<&str, Operation> {
     let (input, _) = preceded(space1, tag("Operation: new = old "))(input)?;
     let (input, (op, val)) = separated_pair(one_of("+-*/"), tag(" "), alphanumeric1)(input)?;
-    todo!();
-    Ok((input, Operation::Add(2)))
+    dbg!(op, val);
+    let val = Value::from_str(val)?;
+    // Ok((input, Operation::Add(2.into())))
 }
 
 pub fn parse_test(input: &str) -> IResult<&str, Test> {
@@ -100,7 +86,7 @@ pub fn parse_test(input: &str) -> IResult<&str, Test> {
     map_res(
         tuple((divisible_by, if_true_throw_to, if_false_throw_to)),
         |(divisible_by, if_true_throw_to, if_false_throw_to)| {
-            let operation = Operation::new('/', divisible_by).unwrap();
+            let operation = Operation::new('/', divisible_by.into()).unwrap();
             Ok::<Test, &str>(Test::new(operation, if_true_throw_to, if_false_throw_to))
         },
     )(input)
