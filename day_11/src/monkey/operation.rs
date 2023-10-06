@@ -1,5 +1,3 @@
-pub trait Calculated {}
-
 #[derive(Debug, thiserror::Error)]
 pub enum OperationError {
     #[error("zero division is not possible")]
@@ -14,14 +12,16 @@ pub enum ValueError {
     ParsingFailed(String),
 }
 
+type WorryLevel = i32;
+
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Value {
-    Const(i32),
+    Const(WorryLevel),
     Old,
 }
 
-impl From<i32> for Value {
-    fn from(value: i32) -> Self {
+impl From<WorryLevel> for Value {
+    fn from(value: WorryLevel) -> Self {
         Value::Const(value)
     }
 }
@@ -30,7 +30,7 @@ impl std::str::FromStr for Value {
     type Err = ValueError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Ok(val) = s.parse::<i32>() {
+        if let Ok(val) = s.parse::<WorryLevel>() {
             return Ok(Self::Const(val));
         }
         if s == "old" {
