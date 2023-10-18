@@ -7,12 +7,8 @@ use std::{collections::VecDeque, str::FromStr};
 
 pub use item::Item;
 use nom::{
-    branch::alt,
-    bytes::complete::{tag, take_until, take_while},
-    character::{
-        complete::{alpha1, alphanumeric1, digit1, line_ending, one_of, space1},
-        is_digit,
-    },
+    bytes::complete::{tag, take_until},
+    character::complete::{alphanumeric1, line_ending, one_of, space1},
     combinator::{all_consuming, map, map_res, opt},
     multi::{many0, separated_list0},
     sequence::{delimited, preceded, separated_pair, terminated, tuple},
@@ -40,6 +36,26 @@ impl Monkey {
             operation,
             test,
         }
+    }
+
+    pub fn test(&self) -> &Test {
+        &self.test
+    }
+
+    pub fn operation(&self) -> &Operation {
+        &self.operation
+    }
+
+    pub fn id(&self) -> u32 {
+        self.id
+    }
+
+    pub fn items(&self) -> &Items {
+        &self.items
+    }
+
+    pub fn items_mut(&mut self) -> &mut Items {
+        &mut self.items
     }
 }
 
