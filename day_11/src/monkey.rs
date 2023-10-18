@@ -3,7 +3,7 @@ mod operation;
 mod parser;
 mod test;
 
-use std::str::FromStr;
+use std::{collections::VecDeque, str::FromStr};
 
 pub use item::Item;
 use nom::{
@@ -22,7 +22,7 @@ pub use operation::{Operation, OperationError, Value, ValueError};
 pub use test::Test;
 
 pub type Monkeys = Vec<Monkey>;
-pub type Items = Vec<Item>;
+pub type Items = VecDeque<Item>;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Monkey {
@@ -55,7 +55,8 @@ pub fn parse_items(input: &str) -> IResult<&str, Items> {
         separated_list0(tag(", "), map(nom::character::complete::u32, Item::from)),
     );
 
-    items_parser(input)
+    let (remaining, items_vec) = items_parser(input)?;
+    Ok((remaining, items_vec.into()))
 }
 
 pub fn parse_operation(input: &str) -> IResult<&str, Operation> {
@@ -110,4 +111,83 @@ pub fn parse_monkey(input: &str) -> IResult<&str, Monkey> {
 
 pub fn parse_monkeys(input: &str) -> IResult<&str, Monkeys> {
     all_consuming(many0(parse_monkey))(input)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::monkey::{parse_monkeys, Item, Monkey, Operation, Value};
+
+    use super::*;
+    use constants::*;
+    use nom::Finish;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn monkeys_to_vec() {
+        let (_r, monkeys) = parse_monkeys(MONKEY_INPUT).finish().unwrap();
+        // dbg!(monkeys);
+        // todo!();
+        let monkey_0 = Monkey {
+            id: 0,
+            items: vec![Item::from(79), Item::from(98)].into(),
+            operation: Operation::Multiply(Value::Const(19)),
+            test: Test::new(Operation::Divide(Value::Const(23)), 2, 3),
+        };
+        let monkey_1 = Monkey {
+            id: 1,
+            items: vec![
+                Item::from(54),
+                Item::from(65),
+                Item::from(75),
+                Item::from(74),
+            ]
+            .into(),
+            operation: Operation::Add(Value::Const(6)),
+            test: Test::new(Operation::Divide(Value::Const(19)), 2, 0),
+        };
+        let monkey_2 = Monkey {
+            id: 2,
+            items: vec![Item::from(79), Item::from(60), Item::from(97)].into(),
+            operation: Operation::Multiply(Value::Old),
+            test: Test::new(Operation::Divide(Value::Const(13)), 1, 3),
+        };
+        let monkey_3 = Monkey {
+            id: 3,
+            items: vec![Item::from(74)].into(),
+            operation: Operation::Add(Value::Const(3)),
+            test: Test::new(Operation::Divide(Value::Const(17)), 0, 1),
+        };
+        assert_eq!(monkeys, vec![monkey_0, monkey_1, monkey_2, monkey_3]);
+    }
+
+    mod constants {
+        pub const MONKEY_INPUT: &str = "Monkey 0:
+  Starting items: 79, 98
+  Operation: new = old * 19
+  Test: divisible by 23
+    If true: throw to monkey 2
+    If false: throw to monkey 3
+
+Monkey 1:
+  Starting items: 54, 65, 75, 74
+  Operation: new = old + 6
+  Test: divisible by 19
+    If true: throw to monkey 2
+    If false: throw to monkey 0
+
+Monkey 2:
+  Starting items: 79, 60, 97
+  Operation: new = old * old
+  Test: divisible by 13
+    If true: throw to monkey 1
+    If false: throw to monkey 3
+
+Monkey 3:
+  Starting items: 74
+  Operation: new = old + 3
+  Test: divisible by 17
+    If true: throw to monkey 0
+    If false: throw to monkey 1
+";
+    }
 }
