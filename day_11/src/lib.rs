@@ -1,6 +1,6 @@
-#![allow(unused_imports, unused_macros)]
+#![allow(unused_macros)]
 
-use log::{debug, error, info, trace, warn};
+use log::debug;
 use monkey::parse_monkeys;
 use nom::Finish;
 
@@ -49,7 +49,7 @@ pub fn play(s: &str) {
 mod test {
     use super::*;
     use env_logger::Env;
-    use log::{debug, error, info, log_enabled, Level};
+    use log::warn;
 
     fn init_log() {
         use std::io::Write;

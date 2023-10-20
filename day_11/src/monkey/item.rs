@@ -1,5 +1,3 @@
-use std::fmt::write;
-
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct Item(u32);
 
