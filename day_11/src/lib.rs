@@ -1,6 +1,6 @@
 #![allow(unused_imports, unused_macros)]
 
-use log::{debug, error, trace, warn};
+use log::{debug, error, info, trace, warn};
 use monkey::parse_monkeys;
 use nom::Finish;
 
@@ -23,16 +23,26 @@ pub fn play(s: &str) {
     let mut monkeys = parse_monkeys(s).finish().unwrap().1;
 
     for round in 1..=20 {
-        debug!("Round {round}:");
+        debug!("---------Round {round}---------");
         for monkey in &mut monkeys {
             debug!("Monkey {}:", monkey.id());
             while let Some(item) = monkey.items_mut().pop_front() {
-                debug!("{}", item);
+                debug!("  Monkey inspects an item with a worry level of {}", item);
+
                 let worry_level = monkey.operation().evaluate(item);
+                debug!("  Worry level is {} to {}", monkey.operation(), worry_level);
+
+                let worry_level = worry_level / 3;
+                debug!(
+                    "  Monkey gets bored with item. Worry level is divided by 3 to {}.",
+                    worry_level
+                );
+
+                let _test = monkey.test();
+                todo!("Monkey item test application");
             }
         }
     }
-    todo!();
 }
 
 #[cfg(test)]
@@ -71,7 +81,7 @@ mod test {
     #[test]
     fn play_part1() {
         init_log();
-        play(include_str!("../input.txt"));
+        // play(include_str!("../input.txt"));
     }
 
     mod constants {

@@ -50,10 +50,6 @@ impl Monkey {
         self.id
     }
 
-    pub fn items(&self) -> &Items {
-        &self.items
-    }
-
     pub fn items_mut(&mut self) -> &mut Items {
         &mut self.items
     }

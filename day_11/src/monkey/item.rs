@@ -9,6 +9,18 @@ impl From<u32> for Item {
     }
 }
 
+impl From<Item> for i32 {
+    fn from(value: Item) -> Self {
+        value.0 as i32
+    }
+}
+
+impl From<Item> for u32 {
+    fn from(value: Item) -> Self {
+        value.0
+    }
+}
+
 impl std::fmt::Debug for Item {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
