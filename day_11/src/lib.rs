@@ -19,16 +19,17 @@ macro_rules! function {
     }};
 }
 
-pub fn play() {
-    let _real_input = include_str!("../input.txt");
-    let test_input = MONKEY_INPUT;
-    let mut monkeys = parse_monkeys(test_input).finish().unwrap().1;
+pub fn play(s: &str) {
+    let mut monkeys = parse_monkeys(s).finish().unwrap().1;
 
     for round in 1..=20 {
         debug!("Round {round}:");
         for monkey in &mut monkeys {
-            let items = monkey.items_mut();
-            debug!("{:?}", items);
+            debug!("Monkey {}:", monkey.id());
+            while let Some(item) = monkey.items_mut().pop_front() {
+                debug!("{}", item);
+                let worry_level = monkey.operation().evaluate(item);
+            }
         }
     }
     todo!();
@@ -43,30 +44,38 @@ mod test {
     fn init_log() {
         use std::io::Write;
         // WARN or above if RUST_LOG was not set
-        env_logger::Builder::from_env(Env::default().default_filter_or("warn"))
+        let log_init_res = env_logger::Builder::from_env(Env::default().default_filter_or("warn"))
             .is_test(true) // pass logs to the test framework
             .format_timestamp(None)
             .format(|buf, record| {
                 writeln!(
                     buf,
-                    "[{}]{}: {}",
+                    "{1} [{0}]: {2}",
                     format_args!("{0}", function!()),
                     record.level(),
                     record.args()
                 )
             })
-            .try_init()
-            .unwrap();
+            .try_init();
+        if let Err(e) = log_init_res {
+            warn!("{}", e.to_string());
+        }
+    }
+
+    #[test]
+    fn play_test_input() {
+        init_log();
+        play(constants::MONKEY_INPUT);
     }
 
     #[test]
     fn play_part1() {
         init_log();
-        play();
+        play(include_str!("../input.txt"));
     }
-}
 
-const MONKEY_INPUT: &str = "Monkey 0:
+    mod constants {
+        pub const MONKEY_INPUT: &str = "Monkey 0:
   Starting items: 79, 98
   Operation: new = old * 19
   Test: divisible by 23
@@ -94,3 +103,5 @@ const MONKEY_INPUT: &str = "Monkey 0:
     If true: throw to monkey 0
     If false: throw to monkey 1
 ";
+    }
+}

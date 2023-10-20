@@ -1,3 +1,5 @@
+use super::Item;
+
 #[derive(Debug, thiserror::Error)]
 pub enum OperationError {
     #[error("zero division is not possible")]
@@ -12,7 +14,7 @@ pub enum ValueError {
     ParsingFailed(String),
 }
 
-type WorryLevel = i32;
+pub type WorryLevel = i32;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Value {
@@ -61,6 +63,15 @@ impl Operation {
                 Ok(Self::Divide(value))
             }
             _ => Err(OperationError::Unsupported(operation)),
+        }
+    }
+
+    pub fn evaluate(&self, other: Item) -> WorryLevel {
+        match self {
+            Operation::Multiply(v) => todo!(),
+            Operation::Divide(v) => todo!(),
+            Operation::Add(v) => todo!(),
+            Operation::Subtract(v) => todo!(),
         }
     }
 }
