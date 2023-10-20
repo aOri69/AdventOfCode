@@ -34,5 +34,6 @@
 			".\\day_10\\Cargo.toml",
 			".\\day_11\\Cargo.toml"
 		],
+		"rust-analyzer.check.command": "clippy",
 	}
 }
