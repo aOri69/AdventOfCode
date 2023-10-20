@@ -50,8 +50,8 @@ mod test {
             .format(|buf, record| {
                 writeln!(
                     buf,
-                    "{1} [{0}]: {2}",
-                    format_args!("{0}", function!()),
+                    "{0}: {1}",
+                    // format_args!("{0}", function!()),
                     record.level(),
                     record.args()
                 )
