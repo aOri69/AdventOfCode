@@ -1,6 +1,5 @@
 mod item;
 mod operation;
-mod parser;
 mod test;
 
 use std::{collections::VecDeque, str::FromStr};
