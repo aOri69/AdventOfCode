@@ -14,7 +14,7 @@ pub enum ValueError {
     ParsingFailed(String),
 }
 
-pub type WorryLevel = i32;
+pub type WorryLevel = i64;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub enum Value {

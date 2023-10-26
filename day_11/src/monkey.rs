@@ -25,6 +25,7 @@ pub struct Monkey {
     items: Items,
     operation: Operation,
     test: Test,
+    evaluations_count: u32,
 }
 
 impl Monkey {
@@ -34,6 +35,7 @@ impl Monkey {
             items,
             operation,
             test,
+            evaluations_count: Default::default(),
         }
     }
 
@@ -56,6 +58,14 @@ impl Monkey {
     pub fn items(&self) -> &Items {
         &self.items
     }
+
+    pub fn evaluations_count_mut(&mut self) -> &mut u32 {
+        &mut self.evaluations_count
+    }
+
+    pub fn evaluations_count(&self) -> u32 {
+        self.evaluations_count
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -67,7 +77,7 @@ pub enum MonkeyError {
 pub fn parse_items(input: &str) -> IResult<&str, Items> {
     let mut items_parser = preceded(
         tag("  Starting items: "),
-        separated_list0(tag(", "), map(nom::character::complete::u32, Item::from)),
+        separated_list0(tag(", "), map(nom::character::complete::u64, Item::from)),
     );
 
     let (remaining, items_vec) = items_parser(input)?;
@@ -86,7 +96,7 @@ pub fn parse_operation(input: &str) -> IResult<&str, Operation> {
 
 pub fn parse_test(input: &str) -> IResult<&str, Test> {
     let divisible_by = terminated(
-        preceded(tag("  Test: divisible by "), nom::character::complete::i32),
+        preceded(tag("  Test: divisible by "), nom::character::complete::i64),
         line_ending,
     );
     let if_true_throw_to = terminated(
@@ -140,6 +150,18 @@ impl<'a> std::fmt::Debug for PrettyMonkeysItems<'a> {
     }
 }
 
+pub struct PrettyMonkeysEvalCount<'a>(pub &'a [Monkey]);
+
+impl<'a> std::fmt::Debug for PrettyMonkeysEvalCount<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for m in self.0.iter() {
+            write!(f, "Monkey {}: ", m.id())?;
+            writeln!(f, "{:?}", m.evaluations_count())?;
+        }
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::monkey::{parse_monkeys, Item, Monkey, Operation, Value};
@@ -159,6 +181,7 @@ mod tests {
             items: vec![Item::from(79), Item::from(98)].into(),
             operation: Operation::Multiply(Value::Const(19)),
             test: Test::new(Operation::Divide(Value::Const(23)), 2, 3),
+            evaluations_count: 0,
         };
         let monkey_1 = Monkey {
             id: 1,
@@ -171,18 +194,21 @@ mod tests {
             .into(),
             operation: Operation::Add(Value::Const(6)),
             test: Test::new(Operation::Divide(Value::Const(19)), 2, 0),
+            evaluations_count: 0,
         };
         let monkey_2 = Monkey {
             id: 2,
             items: vec![Item::from(79), Item::from(60), Item::from(97)].into(),
             operation: Operation::Multiply(Value::Old),
             test: Test::new(Operation::Divide(Value::Const(13)), 1, 3),
+            evaluations_count: 0,
         };
         let monkey_3 = Monkey {
             id: 3,
             items: vec![Item::from(74)].into(),
             operation: Operation::Add(Value::Const(3)),
             test: Test::new(Operation::Divide(Value::Const(17)), 0, 1),
+            evaluations_count: 0,
         };
         assert_eq!(monkeys, vec![monkey_0, monkey_1, monkey_2, monkey_3]);
     }

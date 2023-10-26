@@ -20,6 +20,17 @@ macro_rules! function {
     }};
 }
 
+pub fn get_monkey_business(monkeys: &[Monkey]) -> u32 {
+    let mut monkeys = Vec::from(monkeys);
+    monkeys.sort_by_key(|m| m.evaluations_count());
+    monkeys
+        .iter()
+        .rev()
+        .take(2)
+        .map(|m| m.evaluations_count())
+        .product()
+}
+
 pub fn play(monkeys: &mut [Monkey], rounds: u32) {
     for round in 1..=rounds {
         debug!("-------------------------------Round {round}------------------------------");
@@ -31,6 +42,7 @@ pub fn play(monkeys: &mut [Monkey], rounds: u32) {
                 debug!("  Monkey inspects an item with a worry level of {}", item);
 
                 let worry_level = monkey.operation().evaluate(item);
+                *monkey.evaluations_count_mut() += 1;
                 debug!(
                     "    Worry level is {} to {}",
                     monkey.operation(),
@@ -43,7 +55,7 @@ pub fn play(monkeys: &mut [Monkey], rounds: u32) {
                     worry_level
                 );
 
-                item.set(worry_level as u32);
+                item.set(worry_level as u64);
                 let throw_to = monkey.test().apply(worry_level);
 
                 debug!("    Item with worry level {item} is thrown to monkey {throw_to}");
@@ -64,7 +76,7 @@ pub fn play(monkeys: &mut [Monkey], rounds: u32) {
 
 #[cfg(test)]
 mod test {
-    use crate::monkey::parse_monkeys;
+    use crate::monkey::{parse_monkeys, PrettyMonkeysEvalCount};
 
     use super::*;
     use env_logger::Env;
@@ -97,13 +109,22 @@ mod test {
         init_log();
         let mut monkeys = parse_monkeys(constants::MONKEY_INPUT).finish().unwrap().1;
         play(&mut monkeys, 20);
-        todo!()
+        println!("{:#?}", PrettyMonkeysItems(&monkeys));
+        println!("{:#?}", PrettyMonkeysEvalCount(&monkeys));
+        assert_eq!(get_monkey_business(&monkeys), 10605);
     }
 
     #[test]
     fn play_part1() {
         init_log();
-        // play(include_str!("../input.txt"),20);
+        let mut monkeys = parse_monkeys(include_str!("../input.txt"))
+            .finish()
+            .unwrap()
+            .1;
+        play(&mut monkeys, 20);
+        println!("{:#?}", PrettyMonkeysItems(&monkeys));
+        println!("{:#?}", PrettyMonkeysEvalCount(&monkeys));
+        assert_eq!(get_monkey_business(&monkeys), 99852);
     }
 
     mod constants {

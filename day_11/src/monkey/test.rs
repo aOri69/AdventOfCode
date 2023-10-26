@@ -1,6 +1,6 @@
 use log::debug;
 
-use super::operation::Operation;
+use super::operation::{Operation, WorryLevel};
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct Test {
@@ -18,7 +18,7 @@ impl Test {
         }
     }
 
-    pub fn apply(&self, current_worry: i32) -> usize {
+    pub fn apply(&self, current_worry: WorryLevel) -> usize {
         debug!(
             "    Current worry level {} is not divisible by {}",
             current_worry,
