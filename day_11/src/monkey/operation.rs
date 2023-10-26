@@ -84,12 +84,13 @@ impl Operation {
 
     pub fn evaluate(&self, other: Item) -> WorryLevel {
         let other: WorryLevel = other.into();
-        match self {
-            Operation::Multiply(v) => v.value_or_old(other) * other,
-            Operation::Divide(v) => v.value_or_old(other) / other,
-            Operation::Add(v) => v.value_or_old(other) + other,
-            Operation::Subtract(v) => v.value_or_old(other) - other,
-        }
+        let result = match self {
+            Operation::Multiply(v) => v.value_or_old(other).checked_mul(other),
+            Operation::Divide(v) => v.value_or_old(other).checked_div(other),
+            Operation::Add(v) => v.value_or_old(other).checked_add(other),
+            Operation::Subtract(v) => v.value_or_old(other).checked_sub(other),
+        };
+        result.unwrap_or_else(|| panic!("operation {:?} cannot be applied to\nrhs:{}", self, other))
     }
 
     pub fn value(&self) -> Value {
