@@ -1,8 +1,9 @@
 #![allow(unused_macros)]
 
 use log::debug;
-use monkey::parse_monkeys;
-use nom::Finish;
+use monkey::Monkey;
+
+use crate::monkey::PrettyMonkeysItems;
 
 mod monkey;
 
@@ -19,37 +20,56 @@ macro_rules! function {
     }};
 }
 
-pub fn play(s: &str) {
-    let mut monkeys = parse_monkeys(s).finish().unwrap().1;
+pub fn play(monkeys: &mut [Monkey], rounds: u32) {
+    for round in 1..=rounds {
+        debug!("-------------------------------Round {round}------------------------------");
+        for monkey_idx in 0..monkeys.len() {
+            let mut monkey = monkeys.get(monkey_idx).cloned().unwrap();
 
-    for round in 1..=20 {
-        debug!("---------Round {round}---------");
-        for monkey in &mut monkeys {
             debug!("Monkey {}:", monkey.id());
-            while let Some(item) = monkey.items_mut().pop_front() {
+            while let Some(mut item) = monkey.items_mut().pop_front() {
                 debug!("  Monkey inspects an item with a worry level of {}", item);
 
                 let worry_level = monkey.operation().evaluate(item);
-                debug!("  Worry level is {} to {}", monkey.operation(), worry_level);
-
-                let worry_level = worry_level / 3;
                 debug!(
-                    "  Monkey gets bored with item. Worry level is divided by 3 to {}.",
+                    "    Worry level is {} to {}",
+                    monkey.operation(),
                     worry_level
                 );
 
-                let _test = monkey.test();
-                todo!("Monkey item test application");
+                let worry_level = worry_level / 3;
+                debug!(
+                    "    Monkey gets bored with item. Worry level is divided by 3 to {}.",
+                    worry_level
+                );
+
+                item.set(worry_level as u32);
+                let throw_to = monkey.test().apply(worry_level);
+
+                debug!("    Item with worry level {item} is thrown to monkey {throw_to}");
+
+                monkeys
+                    .get_mut(throw_to)
+                    .unwrap()
+                    .items_mut()
+                    .push_back(item);
             }
+            // place monkey copy(with modified items list) back to Vec
+            *monkeys.get_mut(monkey_idx).unwrap() = monkey;
         }
+        debug!("{:#?}", PrettyMonkeysItems(monkeys));
     }
+    debug!("{:#?}", PrettyMonkeysItems(monkeys));
 }
 
 #[cfg(test)]
 mod test {
+    use crate::monkey::parse_monkeys;
+
     use super::*;
     use env_logger::Env;
     use log::warn;
+    use nom::Finish;
 
     fn init_log() {
         use std::io::Write;
@@ -60,9 +80,9 @@ mod test {
             .format(|buf, record| {
                 writeln!(
                     buf,
-                    "{0}: {1}",
+                    "{}",
                     // format_args!("{0}", function!()),
-                    record.level(),
+                    // record.level(),
                     record.args()
                 )
             })
@@ -75,13 +95,15 @@ mod test {
     #[test]
     fn play_test_input() {
         init_log();
-        play(constants::MONKEY_INPUT);
+        let mut monkeys = parse_monkeys(constants::MONKEY_INPUT).finish().unwrap().1;
+        play(&mut monkeys, 20);
+        todo!()
     }
 
     #[test]
     fn play_part1() {
         init_log();
-        // play(include_str!("../input.txt"));
+        // play(include_str!("../input.txt"),20);
     }
 
     mod constants {

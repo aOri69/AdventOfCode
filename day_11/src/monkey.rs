@@ -19,7 +19,7 @@ pub use test::Test;
 pub type Monkeys = Vec<Monkey>;
 pub type Items = VecDeque<Item>;
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct Monkey {
     id: u32,
     items: Items,
@@ -51,6 +51,10 @@ impl Monkey {
 
     pub fn items_mut(&mut self) -> &mut Items {
         &mut self.items
+    }
+
+    pub fn items(&self) -> &Items {
+        &self.items
     }
 }
 
@@ -122,6 +126,18 @@ pub fn parse_monkey(input: &str) -> IResult<&str, Monkey> {
 
 pub fn parse_monkeys(input: &str) -> IResult<&str, Monkeys> {
     all_consuming(many0(parse_monkey))(input)
+}
+
+pub struct PrettyMonkeysItems<'a>(pub &'a [Monkey]);
+
+impl<'a> std::fmt::Debug for PrettyMonkeysItems<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for m in self.0.iter() {
+            write!(f, "Monkey {}: ", m.id())?;
+            writeln!(f, "{:?}", m.items())?;
+        }
+        Ok(())
+    }
 }
 
 #[cfg(test)]

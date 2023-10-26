@@ -16,7 +16,7 @@ pub enum ValueError {
 
 pub type WorryLevel = i32;
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub enum Value {
     Const(WorryLevel),
     Old,
@@ -60,7 +60,7 @@ impl std::fmt::Display for Value {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub enum Operation {
     Multiply(Value),
     Divide(Value),
@@ -91,6 +91,15 @@ impl Operation {
             Operation::Divide(v) => v.value_or_old(other) / other,
             Operation::Add(v) => v.value_or_old(other) + other,
             Operation::Subtract(v) => v.value_or_old(other) - other,
+        }
+    }
+
+    pub fn value(&self) -> Value {
+        match self {
+            Operation::Multiply(v) => *v,
+            Operation::Divide(v) => *v,
+            Operation::Add(v) => *v,
+            Operation::Subtract(v) => *v,
         }
     }
 }

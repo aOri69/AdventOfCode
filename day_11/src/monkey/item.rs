@@ -1,9 +1,21 @@
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub struct Item(u32);
+
+impl Item {
+    pub fn set(&mut self, v: u32) {
+        self.0 = v;
+    }
+}
 
 impl From<u32> for Item {
     fn from(value: u32) -> Self {
         Self(value)
+    }
+}
+
+impl From<i32> for Item {
+    fn from(value: i32) -> Self {
+        Self(value as u32)
     }
 }
 
