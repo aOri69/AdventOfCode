@@ -21,9 +21,13 @@
 		},
 		"rust-analyzer.inlayHints.bindingModeHints.enable": true,
 		"rust-analyzer.inlayHints.closureCaptureHints.enable": true,
+		"rust-analyzer.inlayHints.closureReturnTypeHints.enable": "always",
+		"rust-analyzer.inlayHints.lifetimeElisionHints.enable": "skip_trivial",
 		"rust-analyzer.inlayHints.maxLength": null,
 		"rust-analyzer.check.command": "clippy",
 		"debug.toolBarLocation": "commandCenter",
 		"git.autofetch": true,
+		"terminal.integrated.enablePersistentSessions": false,
+		"terminal.integrated.persistentSessionReviveProcess": "never",
 	}
 }
