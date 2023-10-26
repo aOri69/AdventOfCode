@@ -8,6 +8,11 @@ use crate::monkey::{parse_monkeys, PrettyMonkeysEvalCount, PrettyMonkeysItems};
 
 mod monkey;
 
+pub struct Settings {
+    rounds: u32,
+    divide_by_3: bool,
+}
+
 macro_rules! function {
     () => {{
         fn f() {}
@@ -32,8 +37,8 @@ pub fn get_monkey_business(monkeys: &[Monkey]) -> WorryLevelUnsigned {
         .product()
 }
 
-pub fn play(monkeys: &mut [Monkey], rounds: u32) {
-    for round in 1..=rounds {
+pub fn play(monkeys: &mut [Monkey], settings: Settings) {
+    for round in 1..=settings.rounds {
         debug!("-------------------------------Round {round}------------------------------");
         for monkey_idx in 0..monkeys.len() {
             let mut monkey = monkeys.get(monkey_idx).cloned().unwrap();
@@ -49,12 +54,14 @@ pub fn play(monkeys: &mut [Monkey], rounds: u32) {
                     monkey.operation(),
                     worry_level
                 );
-
-                let worry_level = worry_level / 3;
-                debug!(
-                    "    Monkey gets bored with item. Worry level is divided by 3 to {}.",
-                    worry_level
-                );
+                let mut worry_level = worry_level;
+                if settings.divide_by_3 {
+                    worry_level /= 3;
+                    debug!(
+                        "    Monkey gets bored with item. Worry level is divided by 3 to {}.",
+                        worry_level
+                    );
+                }
 
                 item.set(worry_level as WorryLevelUnsigned);
                 let throw_to = monkey.test().apply(worry_level);
@@ -80,7 +87,13 @@ pub fn part1() -> WorryLevelUnsigned {
         .finish()
         .unwrap()
         .1;
-    play(&mut monkeys, 20);
+    play(
+        &mut monkeys,
+        Settings {
+            rounds: 20,
+            divide_by_3: true,
+        },
+    );
     println!("{:#?}", PrettyMonkeysItems(&monkeys));
     println!("{:#?}", PrettyMonkeysEvalCount(&monkeys));
     get_monkey_business(&monkeys)
@@ -91,7 +104,13 @@ pub fn part2() -> WorryLevelUnsigned {
         .finish()
         .unwrap()
         .1;
-    play(&mut monkeys, 10000);
+    play(
+        &mut monkeys,
+        Settings {
+            rounds: 10000,
+            divide_by_3: false,
+        },
+    );
     println!("{:#?}", PrettyMonkeysItems(&monkeys));
     println!("{:#?}", PrettyMonkeysEvalCount(&monkeys));
     get_monkey_business(&monkeys)
@@ -131,7 +150,13 @@ mod test {
     fn play_test_input() {
         init_log();
         let mut monkeys = parse_monkeys(constants::MONKEY_INPUT).finish().unwrap().1;
-        play(&mut monkeys, 20);
+        play(
+            &mut monkeys,
+            Settings {
+                rounds: 20,
+                divide_by_3: true,
+            },
+        );
         println!("{:#?}", PrettyMonkeysItems(&monkeys));
         println!("{:#?}", PrettyMonkeysEvalCount(&monkeys));
         assert_eq!(get_monkey_business(&monkeys), 10605);
