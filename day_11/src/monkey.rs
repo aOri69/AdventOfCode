@@ -16,6 +16,8 @@ use nom::{
 pub use operation::{Operation, OperationError, Value, ValueError};
 pub use test::Test;
 
+pub type WorryLevel = i128;
+pub type WorryLevelUnsigned = u128;
 pub type Monkeys = Vec<Monkey>;
 pub type Items = VecDeque<Item>;
 
@@ -25,7 +27,7 @@ pub struct Monkey {
     items: Items,
     operation: Operation,
     test: Test,
-    evaluations_count: u32,
+    evaluations_count: WorryLevelUnsigned,
 }
 
 impl Monkey {
@@ -59,11 +61,11 @@ impl Monkey {
         &self.items
     }
 
-    pub fn evaluations_count_mut(&mut self) -> &mut u32 {
+    pub fn evaluations_count_mut(&mut self) -> &mut WorryLevelUnsigned {
         &mut self.evaluations_count
     }
 
-    pub fn evaluations_count(&self) -> u32 {
+    pub fn evaluations_count(&self) -> WorryLevelUnsigned {
         self.evaluations_count
     }
 }
@@ -77,7 +79,7 @@ pub enum MonkeyError {
 pub fn parse_items(input: &str) -> IResult<&str, Items> {
     let mut items_parser = preceded(
         tag("  Starting items: "),
-        separated_list0(tag(", "), map(nom::character::complete::u64, Item::from)),
+        separated_list0(tag(", "), map(nom::character::complete::u128, Item::from)),
     );
 
     let (remaining, items_vec) = items_parser(input)?;
@@ -96,7 +98,7 @@ pub fn parse_operation(input: &str) -> IResult<&str, Operation> {
 
 pub fn parse_test(input: &str) -> IResult<&str, Test> {
     let divisible_by = terminated(
-        preceded(tag("  Test: divisible by "), nom::character::complete::i64),
+        preceded(tag("  Test: divisible by "), nom::character::complete::i128),
         line_ending,
     );
     let if_true_throw_to = terminated(
@@ -115,7 +117,11 @@ pub fn parse_test(input: &str) -> IResult<&str, Test> {
         tuple((divisible_by, if_true_throw_to, if_false_throw_to)),
         |(divisible_by, if_true_throw_to, if_false_throw_to)| {
             let operation = Operation::new('/', divisible_by.into()).unwrap();
-            Ok::<Test, &str>(Test::new(operation, if_true_throw_to, if_false_throw_to))
+            Ok::<Test, &str>(Test::new(
+                operation,
+                if_true_throw_to.try_into().unwrap(),
+                if_false_throw_to.try_into().unwrap(),
+            ))
         },
     )(input)
 }

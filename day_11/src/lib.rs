@@ -1,9 +1,10 @@
 #![allow(unused_macros)]
 
 use log::debug;
-use monkey::Monkey;
+use monkey::{Monkey, WorryLevelUnsigned};
+use nom::Finish;
 
-use crate::monkey::PrettyMonkeysItems;
+use crate::monkey::{parse_monkeys, PrettyMonkeysEvalCount, PrettyMonkeysItems};
 
 mod monkey;
 
@@ -20,7 +21,7 @@ macro_rules! function {
     }};
 }
 
-pub fn get_monkey_business(monkeys: &[Monkey]) -> u32 {
+pub fn get_monkey_business(monkeys: &[Monkey]) -> WorryLevelUnsigned {
     let mut monkeys = Vec::from(monkeys);
     monkeys.sort_by_key(|m| m.evaluations_count());
     monkeys
@@ -55,7 +56,7 @@ pub fn play(monkeys: &mut [Monkey], rounds: u32) {
                     worry_level
                 );
 
-                item.set(worry_level as u64);
+                item.set(worry_level as WorryLevelUnsigned);
                 let throw_to = monkey.test().apply(worry_level);
 
                 debug!("    Item with worry level {item} is thrown to monkey {throw_to}");
@@ -74,6 +75,28 @@ pub fn play(monkeys: &mut [Monkey], rounds: u32) {
     debug!("{:#?}", PrettyMonkeysItems(monkeys));
 }
 
+pub fn part1() -> WorryLevelUnsigned {
+    let mut monkeys = parse_monkeys(include_str!("../input.txt"))
+        .finish()
+        .unwrap()
+        .1;
+    play(&mut monkeys, 20);
+    println!("{:#?}", PrettyMonkeysItems(&monkeys));
+    println!("{:#?}", PrettyMonkeysEvalCount(&monkeys));
+    get_monkey_business(&monkeys)
+}
+
+pub fn part2() -> WorryLevelUnsigned {
+    let mut monkeys = parse_monkeys(include_str!("../input.txt"))
+        .finish()
+        .unwrap()
+        .1;
+    play(&mut monkeys, 10000);
+    println!("{:#?}", PrettyMonkeysItems(&monkeys));
+    println!("{:#?}", PrettyMonkeysEvalCount(&monkeys));
+    get_monkey_business(&monkeys)
+}
+
 #[cfg(test)]
 mod test {
     use crate::monkey::{parse_monkeys, PrettyMonkeysEvalCount};
@@ -87,7 +110,7 @@ mod test {
         use std::io::Write;
         // WARN or above if RUST_LOG was not set
         let log_init_res = env_logger::Builder::from_env(Env::default().default_filter_or("warn"))
-            .is_test(true) // pass logs to the test framework
+            .is_test(false) // pass logs to the test framework
             .format_timestamp(None)
             .format(|buf, record| {
                 writeln!(
@@ -117,14 +140,13 @@ mod test {
     #[test]
     fn play_part1() {
         init_log();
-        let mut monkeys = parse_monkeys(include_str!("../input.txt"))
-            .finish()
-            .unwrap()
-            .1;
-        play(&mut monkeys, 20);
-        println!("{:#?}", PrettyMonkeysItems(&monkeys));
-        println!("{:#?}", PrettyMonkeysEvalCount(&monkeys));
-        assert_eq!(get_monkey_business(&monkeys), 99852);
+        assert_eq!(part1(), 99852);
+    }
+
+    #[test]
+    fn play_part2() {
+        init_log();
+        assert_eq!(part2(), 99852);
     }
 
     mod constants {

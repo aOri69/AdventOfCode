@@ -1,16 +1,16 @@
 use log::debug;
 
-use super::operation::{Operation, WorryLevel};
+use super::{operation::Operation, WorryLevel};
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct Test {
     operation: Operation,
-    if_true_throw_to: u32,
-    if_false_throw_to: u32,
+    if_true_throw_to: usize,
+    if_false_throw_to: usize,
 }
 
 impl Test {
-    pub fn new(operation: Operation, if_true_throw_to: u32, if_false_throw_to: u32) -> Self {
+    pub fn new(operation: Operation, if_true_throw_to: usize, if_false_throw_to: usize) -> Self {
         Self {
             operation,
             if_true_throw_to,
@@ -27,8 +27,8 @@ impl Test {
 
         if let crate::monkey::Value::Const(op_value) = self.operation.value() {
             match current_worry % op_value {
-                0 => self.if_true_throw_to as usize,
-                _ => self.if_false_throw_to as usize,
+                0 => self.if_true_throw_to,
+                _ => self.if_false_throw_to,
             }
         } else {
             panic!("wrong operation in test. should be only division");

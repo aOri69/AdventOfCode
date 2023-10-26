@@ -1,4 +1,4 @@
-use super::Item;
+use super::{Item, WorryLevel};
 
 #[derive(Debug, thiserror::Error)]
 pub enum OperationError {
@@ -13,8 +13,6 @@ pub enum ValueError {
     #[error("unable to parse \"{0:?}\" as an arithmetic value")]
     ParsingFailed(String),
 }
-
-pub type WorryLevel = i64;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub enum Value {
