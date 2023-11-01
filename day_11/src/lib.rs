@@ -1,10 +1,8 @@
-#![allow(unused_macros)]
-
 use log::debug;
-use monkey::{Monkey, WorryLevelUnsigned};
+use monkey::Monkey;
 use nom::Finish;
 
-use crate::monkey::{parse_monkeys, PrettyMonkeysEvalCount, PrettyMonkeysItems};
+use crate::monkey::{parse_monkeys, PrettyMonkeysEvalCount, PrettyMonkeysItems, WorryLevel};
 
 mod monkey;
 
@@ -13,6 +11,7 @@ pub struct Settings {
     divide_by_3: bool,
 }
 
+#[allow(unused_macros)]
 macro_rules! function {
     () => {{
         fn f() {}
@@ -26,7 +25,7 @@ macro_rules! function {
     }};
 }
 
-pub fn get_monkey_business(monkeys: &[Monkey]) -> WorryLevelUnsigned {
+pub fn get_monkey_business(monkeys: &[Monkey]) -> WorryLevel {
     let mut monkeys = Vec::from(monkeys);
     monkeys.sort_by_key(|m| m.evaluations_count());
     monkeys
@@ -38,6 +37,12 @@ pub fn get_monkey_business(monkeys: &[Monkey]) -> WorryLevelUnsigned {
 }
 
 pub fn play(monkeys: &mut [Monkey], settings: Settings) {
+    let divisor_product = monkeys
+        .iter()
+        .map(|m| m.test().operation().value().value().unwrap_or_default())
+        .product::<WorryLevel>();
+    dbg!(divisor_product);
+
     for round in 1..=settings.rounds {
         debug!("-------------------------------Round {round}------------------------------");
         for monkey_idx in 0..monkeys.len() {
@@ -46,6 +51,10 @@ pub fn play(monkeys: &mut [Monkey], settings: Settings) {
             debug!("Monkey {}:", monkey.id());
             while let Some(mut item) = monkey.items_mut().pop_front() {
                 debug!("  Monkey inspects an item with a worry level of {}", item);
+                if !settings.divide_by_3 {
+                    item %= divisor_product.into();
+                    debug!("  Divisor product applied {}", item);
+                }
 
                 let worry_level = monkey.operation().evaluate(item);
                 *monkey.evaluations_count_mut() += 1;
@@ -63,7 +72,7 @@ pub fn play(monkeys: &mut [Monkey], settings: Settings) {
                     );
                 }
 
-                item.set(worry_level as WorryLevelUnsigned);
+                item.set(worry_level as WorryLevel);
                 let throw_to = monkey.test().apply(worry_level);
 
                 debug!("    Item with worry level {item} is thrown to monkey {throw_to}");
@@ -78,11 +87,23 @@ pub fn play(monkeys: &mut [Monkey], settings: Settings) {
             *monkeys.get_mut(monkey_idx).unwrap() = monkey;
         }
         debug!("{:#?}", PrettyMonkeysItems(monkeys));
+        // if [
+        //     1, 20, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000,
+        // ]
+        // .contains(&round)
+        // {
+        //     println!(
+        //         "After round {}:\n{:#?}",
+        //         round,
+        //         PrettyMonkeysEvalCount(monkeys)
+        //     );
+        // }
     }
+    println!("After round 20:\n{:#?}", PrettyMonkeysEvalCount(monkeys));
     debug!("{:#?}", PrettyMonkeysItems(monkeys));
 }
 
-pub fn part1() -> WorryLevelUnsigned {
+pub fn part1() -> WorryLevel {
     let mut monkeys = parse_monkeys(include_str!("../input.txt"))
         .finish()
         .unwrap()
@@ -99,7 +120,7 @@ pub fn part1() -> WorryLevelUnsigned {
     get_monkey_business(&monkeys)
 }
 
-pub fn part2() -> WorryLevelUnsigned {
+pub fn part2() -> WorryLevel {
     let mut monkeys = parse_monkeys(include_str!("../input.txt"))
         .finish()
         .unwrap()
@@ -147,7 +168,7 @@ mod test {
     }
 
     #[test]
-    fn play_test_input() {
+    fn play_test_input_1() {
         init_log();
         let mut monkeys = parse_monkeys(constants::MONKEY_INPUT).finish().unwrap().1;
         play(
@@ -163,6 +184,22 @@ mod test {
     }
 
     #[test]
+    fn play_test_input_2() {
+        init_log();
+        let mut monkeys = parse_monkeys(constants::MONKEY_INPUT).finish().unwrap().1;
+        play(
+            &mut monkeys,
+            Settings {
+                rounds: 10000,
+                divide_by_3: false,
+            },
+        );
+        println!("{:#?}", PrettyMonkeysItems(&monkeys));
+        println!("{:#?}", PrettyMonkeysEvalCount(&monkeys));
+        assert_eq!(get_monkey_business(&monkeys), 2713310158);
+    }
+
+    #[test]
     fn play_part1() {
         init_log();
         assert_eq!(part1(), 99852);
@@ -171,7 +208,7 @@ mod test {
     #[test]
     fn play_part2() {
         init_log();
-        assert_eq!(part2(), 99852);
+        assert_eq!(part2(), 25935263541);
     }
 
     mod constants {

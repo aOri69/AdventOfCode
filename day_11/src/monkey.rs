@@ -16,8 +16,7 @@ use nom::{
 pub use operation::{Operation, OperationError, Value, ValueError};
 pub use test::Test;
 
-pub type WorryLevel = i128;
-pub type WorryLevelUnsigned = u128;
+pub type WorryLevel = u64;
 pub type Monkeys = Vec<Monkey>;
 pub type Items = VecDeque<Item>;
 
@@ -27,7 +26,7 @@ pub struct Monkey {
     items: Items,
     operation: Operation,
     test: Test,
-    evaluations_count: WorryLevelUnsigned,
+    evaluations_count: WorryLevel,
 }
 
 impl Monkey {
@@ -61,11 +60,11 @@ impl Monkey {
         &self.items
     }
 
-    pub fn evaluations_count_mut(&mut self) -> &mut WorryLevelUnsigned {
+    pub fn evaluations_count_mut(&mut self) -> &mut WorryLevel {
         &mut self.evaluations_count
     }
 
-    pub fn evaluations_count(&self) -> WorryLevelUnsigned {
+    pub fn evaluations_count(&self) -> WorryLevel {
         self.evaluations_count
     }
 }
@@ -79,7 +78,7 @@ pub enum MonkeyError {
 pub fn parse_items(input: &str) -> IResult<&str, Items> {
     let mut items_parser = preceded(
         tag("  Starting items: "),
-        separated_list0(tag(", "), map(nom::character::complete::u128, Item::from)),
+        separated_list0(tag(", "), map(nom::character::complete::u64, Item::from)),
     );
 
     let (remaining, items_vec) = items_parser(input)?;
@@ -98,7 +97,7 @@ pub fn parse_operation(input: &str) -> IResult<&str, Operation> {
 
 pub fn parse_test(input: &str) -> IResult<&str, Test> {
     let divisible_by = terminated(
-        preceded(tag("  Test: divisible by "), nom::character::complete::i128),
+        preceded(tag("  Test: divisible by "), nom::character::complete::u64),
         line_ending,
     );
     let if_true_throw_to = terminated(

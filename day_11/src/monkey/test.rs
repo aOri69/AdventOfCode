@@ -34,4 +34,8 @@ impl Test {
             panic!("wrong operation in test. should be only division");
         }
     }
+
+    pub fn operation(&self) -> &Operation {
+        &self.operation
+    }
 }

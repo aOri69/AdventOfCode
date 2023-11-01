@@ -21,6 +21,13 @@ pub enum Value {
 }
 
 impl Value {
+    pub fn value(&self) -> Option<WorryLevel> {
+        if let Value::Const(v) = self {
+            return Some(*v);
+        }
+        None
+    }
+
     fn value_or_old(&self, old: WorryLevel) -> WorryLevel {
         match self {
             Value::Const(c) => *c,
