@@ -17,6 +17,17 @@ impl From<char> for Node {
     }
 }
 
+impl std::fmt::Debug for Node {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        todo!("Implement formatted print for Node")
+        match self {
+            Self::Start => write!(f, "Start"),
+            Self::End => write!(f, "End"),
+            Self::Path(arg0) => f.debug_tuple("Path").field(arg0).finish(),
+        }
+    }
+}
+
 #[derive(Debug)]
 struct Grid(Vec<Vec<Node>>);
 
