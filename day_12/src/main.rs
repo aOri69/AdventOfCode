@@ -1,6 +1,6 @@
 use std::convert::Infallible;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 enum Node {
     Start,
     End,
@@ -19,19 +19,32 @@ impl From<char> for Node {
 
 impl std::fmt::Debug for Node {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!("Implement formatted print for Node")
-        match self {
-            Self::Start => write!(f, "Start"),
-            Self::End => write!(f, "End"),
-            Self::Path(arg0) => f.debug_tuple("Path").field(arg0).finish(),
-        }
+        let c = match self {
+            Self::Start => "S".to_owned(),
+            Self::End => "E".to_owned(),
+            Self::Path(arg0) => arg0.to_string(),
+        };
+        write!(f, "{:^3}", c)?;
+        Ok(())
     }
 }
 
-#[derive(Debug)]
 struct Grid(Vec<Vec<Node>>);
 
 impl Grid {}
+
+impl std::fmt::Debug for Grid {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "\n")?;
+        for row in self.0.iter() {
+            for col in row.iter() {
+                write!(f, "{col:?}")?;
+            }
+            write!(f, "\n")?;
+        }
+        Ok(())
+    }
+}
 
 impl std::str::FromStr for Grid {
     type Err = Infallible; //Box<dyn std::error::Error>;
