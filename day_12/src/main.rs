@@ -1,4 +1,4 @@
-use std::convert::Infallible;
+use std::{convert::Infallible, str::FromStr};
 
 #[derive(Clone)]
 enum Node {
@@ -29,9 +29,29 @@ impl std::fmt::Debug for Node {
     }
 }
 
+enum Algorithm {
+    Dfs,
+    Bfs,
+}
+
 struct Grid(Vec<Vec<Node>>);
 
-impl Grid {}
+impl Grid {
+    fn shortest_path(&self, alg: Algorithm) -> Option<usize> {
+        match alg {
+            Algorithm::Dfs => self.dfs(),
+            Algorithm::Bfs => self.bfs(),
+        }
+    }
+
+    fn dfs(&self) -> Option<usize> {
+        todo!("Depth-first search")
+    }
+
+    fn bfs(&self) -> Option<usize> {
+        todo!("Breadth-first search")
+    }
+}
 
 impl std::fmt::Debug for Grid {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -50,7 +70,7 @@ impl std::str::FromStr for Grid {
     type Err = Infallible; //Box<dyn std::error::Error>;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        dbg!("{}", b'a');
+        dbg!(b'a');
         let grid = s
             .lines()
             .map(|s| s.chars().map(Node::from).collect::<Vec<_>>())
@@ -59,9 +79,18 @@ impl std::str::FromStr for Grid {
     }
 }
 
-fn main() {
-    let _input = include_str!("../input.txt");
-    println!("Hello, world!");
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let grid = Grid::from_str(include_str!("../input.txt"))?;
+    dbg!(&grid);
+    println!(
+        "Shortest path using BFS alg: {}",
+        grid.shortest_path(Algorithm::Bfs).unwrap_or_default()
+    );
+    println!(
+        "Shortest path using DFS alg: {}",
+        grid.shortest_path(Algorithm::Dfs).unwrap_or_default()
+    );
+    std::process::exit(0);
 }
 
 #[cfg(test)]
@@ -74,8 +103,10 @@ mod tests {
     fn small_input() {
         let input = "Sabqponm\nabcryxxl\naccszExk\nacctuvwj\nabdefghi";
         input.lines().for_each(|l| println!("{l}"));
-        let grid = Grid::from_str(input);
-        dbg!(grid.unwrap());
-        todo!()
+        let grid = Grid::from_str(input).unwrap();
+        dbg!(&grid);
+
+        assert_eq!(grid.shortest_path(Algorithm::Bfs), Some(31));
+        assert_eq!(grid.shortest_path(Algorithm::Dfs), Some(31));
     }
 }
