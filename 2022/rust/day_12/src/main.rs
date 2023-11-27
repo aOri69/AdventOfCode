@@ -45,22 +45,22 @@ impl Grid {
     }
 
     fn dfs(&self) -> Option<usize> {
-        todo!("Depth-first search")
+        None
     }
 
     fn bfs(&self) -> Option<usize> {
-        todo!("Breadth-first search")
+        None
     }
 }
 
 impl std::fmt::Debug for Grid {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "\n")?;
+        writeln!(f)?;
         for row in self.0.iter() {
             for col in row.iter() {
                 write!(f, "{col:?}")?;
             }
-            write!(f, "\n")?;
+            writeln!(f)?;
         }
         Ok(())
     }
@@ -70,7 +70,7 @@ impl std::str::FromStr for Grid {
     type Err = Infallible; //Box<dyn std::error::Error>;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        dbg!(b'a');
+        // dbg!(b'a'); // 97
         let grid = s
             .lines()
             .map(|s| s.chars().map(Node::from).collect::<Vec<_>>())
@@ -81,14 +81,14 @@ impl std::str::FromStr for Grid {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let grid = Grid::from_str(include_str!("../input.txt"))?;
-    dbg!(&grid);
+    // dbg!(&grid);
     println!(
-        "Shortest path using BFS alg: {}",
-        grid.shortest_path(Algorithm::Bfs).unwrap_or_default()
+        "Shortest path using BFS alg: {:?}",
+        grid.shortest_path(Algorithm::Bfs)
     );
     println!(
-        "Shortest path using DFS alg: {}",
-        grid.shortest_path(Algorithm::Dfs).unwrap_or_default()
+        "Shortest path using DFS alg: {:?}",
+        grid.shortest_path(Algorithm::Dfs)
     );
     std::process::exit(0);
 }
