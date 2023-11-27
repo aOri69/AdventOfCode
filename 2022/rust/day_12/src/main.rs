@@ -1,6 +1,6 @@
 use std::{convert::Infallible, str::FromStr};
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq)]
 enum Node {
     Start,
     End,
@@ -34,7 +34,28 @@ enum Algorithm {
     Bfs,
 }
 
-struct Grid(Vec<Vec<Node>>);
+struct Coord {
+    x: usize,
+    y: usize,
+}
+
+impl From<(usize, usize)> for Coord {
+    fn from((x, y): (usize, usize)) -> Self {
+        Self { x, y }
+    }
+}
+
+impl std::fmt::Debug for Coord {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("").field(&self.x).field(&self.y).finish()
+    }
+}
+
+struct Grid {
+    start: Coord,
+    end: Coord,
+    grid: Vec<Vec<Node>>,
+}
 
 impl Grid {
     fn shortest_path(&self, alg: Algorithm) -> Option<usize> {
@@ -53,10 +74,40 @@ impl Grid {
     }
 }
 
+impl Grid {
+    fn get_grid_match_coord(grid: &[Vec<Node>], node_to_find: Node) -> Coord {
+        let width = grid.get(0).unwrap().len();
+        let flatten_coord = match node_to_find {
+            Node::Start => Grid::get_flatten_start(grid),
+            Node::End => Grid::get_flatten_end(grid),
+            Node::Path(_) => panic!("method supposed to be used only with Start/End"),
+        };
+        Coord {
+            x: flatten_coord - (flatten_coord / width) * width,
+            y: flatten_coord / width,
+        }
+    }
+
+    fn get_flatten_start(grid: &[Vec<Node>]) -> usize {
+        grid.iter()
+            .flatten()
+            .position(|node| matches!(node, Node::Start))
+            .unwrap_or_default()
+    }
+    fn get_flatten_end(grid: &[Vec<Node>]) -> usize {
+        grid.iter()
+            .flatten()
+            .position(|node| matches!(node, Node::End))
+            .unwrap_or_default()
+    }
+}
+
 impl std::fmt::Debug for Grid {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f)?;
-        for row in self.0.iter() {
+        write!(f, "start: {:?}, end: {:?}", self.start, self.end)?;
+        writeln!(f)?;
+        for row in self.grid.iter() {
             for col in row.iter() {
                 write!(f, "{col:?}")?;
             }
@@ -75,7 +126,14 @@ impl std::str::FromStr for Grid {
             .lines()
             .map(|s| s.chars().map(Node::from).collect::<Vec<_>>())
             .collect::<Vec<_>>();
-        Ok(Self(grid))
+
+        let start_pos = Grid::get_grid_match_coord(&grid, Node::Start);
+        let end_pos = Grid::get_grid_match_coord(&grid, Node::End);
+        Ok(Self {
+            start: start_pos,
+            end: end_pos,
+            grid,
+        })
     }
 }
 
