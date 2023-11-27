@@ -25,6 +25,9 @@
 		"rust-analyzer.inlayHints.lifetimeElisionHints.enable": "skip_trivial",
 		"rust-analyzer.inlayHints.maxLength": null,
 		"rust-analyzer.check.command": "clippy",
+		"rust-analyzer.linkedProjects": [
+			"2022/rust/Cargo.toml"
+		],
 		"debug.toolBarLocation": "commandCenter",
 		"git.autofetch": true,
 		"terminal.integrated.enablePersistentSessions": false,
