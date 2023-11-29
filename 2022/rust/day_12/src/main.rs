@@ -75,7 +75,7 @@ struct Grid {
     grid: Vec<Vec<Node>>,
     dim: Dimension,
 }
-
+// Logic impls
 impl Grid {
     fn shortest_path(&self, alg: Algorithm) -> Option<usize> {
         match alg {
@@ -96,28 +96,34 @@ impl Grid {
         self.dim.height > coord.row && self.dim.width > coord.col
     }
 
-    fn walkable_neighbours(&self, coord: &Coord) -> Option<Vec<Coord>> {
-        let current_heigth = self.grid.get(coord.row)?.get(coord.col)?.elevation();
-        let neighbours = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    fn walkable_neighbours(&self, coord: &Coord) -> impl Iterator<Item = Coord> + '_ {
+        let current_heigth = self
+            .grid
+            .get(coord.row)
+            .unwrap() // should be just fine
+            .get(coord.col)
+            .unwrap() // should be just fine
+            .elevation();
+        [(-1, 0), (1, 0), (0, -1), (0, 1)]
             .map(move |(dx, dy)| {
                 Some(Coord {
                     row: coord.row.checked_add_signed(dx)?,
                     col: coord.col.checked_add_signed(dy)?,
                 })
             })
-            .into_iter();
-        // .filter(|c| c.is_some())
-        // .filter(|c| self.in_bounds());
-        dbg!(current_heigth);
-        dbg!(neighbours);
-        None
+            .into_iter()
+            .flatten()
+            .filter(move |c| {
+                self.node(c)
+                    .is_some_and(|n| n.elevation().abs_diff(current_heigth) <= 1)
+            })
     }
 
     fn node(&self, coord: &Coord) -> Option<&Node> {
         self.grid.get(coord.row)?.get(coord.col)
     }
 }
-
+// Parsing impls
 impl Grid {
     fn get_grid_match_coord(grid: &[Vec<Node>], node_to_find: Node) -> Coord {
         let width = grid.get(0).unwrap().len();
@@ -145,7 +151,7 @@ impl Grid {
             .unwrap_or_default()
     }
 }
-
+// Trait impls
 impl std::fmt::Debug for Grid {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f)?;
@@ -214,9 +220,6 @@ mod tests {
         input.lines().for_each(|l| println!("{l}"));
         let grid = Grid::from_str(input).unwrap();
         dbg!(&grid);
-
-        dbg!(&grid.walkable_neighbours(&grid.start));
-        dbg!(&grid.walkable_neighbours(&grid.end));
 
         assert_eq!(grid.shortest_path(Algorithm::Bfs), Some(31));
         assert_eq!(grid.shortest_path(Algorithm::Dfs), Some(31));
