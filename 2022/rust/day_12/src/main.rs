@@ -1,6 +1,11 @@
 #![allow(unused)]
 
-use std::{convert::Infallible, str::FromStr};
+use std::{
+    collections::{HashSet, VecDeque},
+    convert::Infallible,
+    ops::Add,
+    str::FromStr,
+};
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 enum Node {
@@ -46,7 +51,7 @@ enum Algorithm {
     Bfs,
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct Coord {
     row: usize,
     col: usize,
@@ -89,6 +94,33 @@ impl Grid {
     }
 
     fn bfs(&self) -> Option<usize> {
+        let mut visited = HashSet::new();
+        let mut queue = VecDeque::new();
+
+        // initialization
+        queue.push_back(self.start);
+        let mut steps: usize = 0;
+
+        while !queue.is_empty() {
+            // safe because of while condition
+            let current = queue.pop_front().unwrap();
+            // set to "visited"
+            visited.insert(current);
+            // break&return condition
+            if current == self.end {
+                return Some(steps);
+            }
+            // all walkable neighbours
+            for neighbour in self.walkable_neighbours(current) {
+                // that have not yet been visited
+                if !visited.contains(&neighbour) {
+                    // add to queue and set as "visited"
+                    queue.push_back(neighbour);
+                    visited.insert(neighbour);
+                }
+            }
+        }
+
         None
     }
 
@@ -96,7 +128,7 @@ impl Grid {
         self.dim.height > coord.row && self.dim.width > coord.col
     }
 
-    fn walkable_neighbours(&self, coord: &Coord) -> impl Iterator<Item = Coord> + '_ {
+    fn walkable_neighbours(&self, coord: Coord) -> impl Iterator<Item = Coord> + '_ {
         let current_heigth = self
             .grid
             .get(coord.row)
