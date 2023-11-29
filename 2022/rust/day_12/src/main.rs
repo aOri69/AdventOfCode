@@ -1,10 +1,22 @@
+#![allow(unused)]
+
 use std::{convert::Infallible, str::FromStr};
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 enum Node {
     Start,
     End,
     Path(u8),
+}
+
+impl Node {
+    fn elevation(self) -> u8 {
+        match self {
+            Node::Start => 0,
+            Node::End => 25,
+            Node::Path(h) => h,
+        }
+    }
 }
 
 impl From<char> for Node {
@@ -34,27 +46,34 @@ enum Algorithm {
     Bfs,
 }
 
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct Coord {
-    x: usize,
-    y: usize,
+    row: usize,
+    col: usize,
 }
 
 impl From<(usize, usize)> for Coord {
-    fn from((x, y): (usize, usize)) -> Self {
-        Self { x, y }
+    fn from((row, col): (usize, usize)) -> Self {
+        Self { row, col }
     }
 }
 
 impl std::fmt::Debug for Coord {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("").field(&self.x).field(&self.y).finish()
+        f.debug_tuple("").field(&self.row).field(&self.col).finish()
     }
+}
+
+struct Dimension {
+    height: usize,
+    width: usize,
 }
 
 struct Grid {
     start: Coord,
     end: Coord,
     grid: Vec<Vec<Node>>,
+    dim: Dimension,
 }
 
 impl Grid {
@@ -72,6 +91,31 @@ impl Grid {
     fn bfs(&self) -> Option<usize> {
         None
     }
+
+    fn in_bounds(&self, coord: &Coord) -> bool {
+        self.dim.height > coord.row && self.dim.width > coord.col
+    }
+
+    fn walkable_neighbours(&self, coord: &Coord) -> Option<Vec<Coord>> {
+        let current_heigth = self.grid.get(coord.row)?.get(coord.col)?.elevation();
+        let neighbours = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+            .map(move |(dx, dy)| {
+                Some(Coord {
+                    row: coord.row.checked_add_signed(dx)?,
+                    col: coord.col.checked_add_signed(dy)?,
+                })
+            })
+            .into_iter();
+        // .filter(|c| c.is_some())
+        // .filter(|c| self.in_bounds());
+        dbg!(current_heigth);
+        dbg!(neighbours);
+        None
+    }
+
+    fn node(&self, coord: &Coord) -> Option<&Node> {
+        self.grid.get(coord.row)?.get(coord.col)
+    }
 }
 
 impl Grid {
@@ -83,8 +127,8 @@ impl Grid {
             Node::Path(_) => panic!("method supposed to be used only with Start/End"),
         };
         Coord {
-            x: flatten_coord - (flatten_coord / width) * width,
-            y: flatten_coord / width,
+            row: flatten_coord / width,
+            col: flatten_coord - (flatten_coord / width) * width,
         }
     }
 
@@ -127,12 +171,19 @@ impl std::str::FromStr for Grid {
             .map(|s| s.chars().map(Node::from).collect::<Vec<_>>())
             .collect::<Vec<_>>();
 
+        let height = grid.len();
+        let width = match grid.first() {
+            Some(first_row) => first_row.len(),
+            None => 0,
+        };
+
         let start_pos = Grid::get_grid_match_coord(&grid, Node::Start);
         let end_pos = Grid::get_grid_match_coord(&grid, Node::End);
         Ok(Self {
             start: start_pos,
             end: end_pos,
             grid,
+            dim: Dimension { height, width },
         })
     }
 }
@@ -163,6 +214,9 @@ mod tests {
         input.lines().for_each(|l| println!("{l}"));
         let grid = Grid::from_str(input).unwrap();
         dbg!(&grid);
+
+        dbg!(&grid.walkable_neighbours(&grid.start));
+        dbg!(&grid.walkable_neighbours(&grid.end));
 
         assert_eq!(grid.shortest_path(Algorithm::Bfs), Some(31));
         assert_eq!(grid.shortest_path(Algorithm::Dfs), Some(31));
