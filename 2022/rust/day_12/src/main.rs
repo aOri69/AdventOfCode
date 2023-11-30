@@ -1,7 +1,7 @@
 #![allow(unused)]
 
 use std::{
-    collections::{HashSet, VecDeque},
+    collections::{hash_map, HashMap, HashSet, VecDeque},
     convert::Infallible,
     ops::Add,
     str::FromStr,
@@ -69,11 +69,13 @@ impl std::fmt::Debug for Coord {
     }
 }
 
+#[derive(Clone)]
 struct Dimension {
     height: usize,
     width: usize,
 }
 
+#[derive(Clone)]
 struct Grid {
     start: Coord,
     end: Coord,
@@ -94,33 +96,40 @@ impl Grid {
     }
 
     fn bfs(&self) -> Option<usize> {
-        let mut visited = HashSet::new();
+        let mut visited = HashMap::new();
         let mut queue = VecDeque::new();
+        let mut dst = vec![vec![0_usize; self.grid.first().unwrap().len()]; self.grid.len()];
 
         // initialization
         queue.push_back(self.start);
-        let mut steps: usize = 0;
+        let mut prev = None;
 
         while !queue.is_empty() {
             // safe because of while condition
             let current = queue.pop_front().unwrap();
+            if let Coord { row: 25, col: 113 } = current {
+                println!();
+            }
             // set to "visited"
-            visited.insert(current);
+            visited.entry(current).or_insert(prev); //insert(current, prev);
+
             // break&return condition
             if current == self.end {
-                return Some(steps);
+                return Some(dst[self.end.row][self.end.col]);
             }
             // all walkable neighbours
             for neighbour in self.walkable_neighbours(current) {
+                // print!("{neighbour:?} ");
                 // that have not yet been visited
-                if !visited.contains(&neighbour) {
+                if let hash_map::Entry::Vacant(e) = visited.entry(neighbour) {
                     // add to queue and set as "visited"
                     queue.push_back(neighbour);
-                    visited.insert(neighbour);
+                    e.insert(Some(current));
+                    dst[neighbour.row][neighbour.col] = dst[current.row][current.col] + 1;
                 }
             }
+            prev = Some(current);
         }
-
         None
     }
 
@@ -228,7 +237,6 @@ impl std::str::FromStr for Grid {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let grid = Grid::from_str(include_str!("../input.txt"))?;
-    // dbg!(&grid);
     println!(
         "Shortest path using BFS alg: {:?}",
         grid.shortest_path(Algorithm::Bfs)
@@ -246,14 +254,26 @@ mod tests {
 
     use super::*;
 
-    #[test]
-    fn small_input() {
-        let input = "Sabqponm\nabcryxxl\naccszExk\nacctuvwj\nabdefghi";
-        input.lines().for_each(|l| println!("{l}"));
-        let grid = Grid::from_str(input).unwrap();
-        dbg!(&grid);
+    const INPUT: &str = "Sabqponm\nabcryxxl\naccszExk\nacctuvwj\nabdefghi";
 
-        assert_eq!(grid.shortest_path(Algorithm::Bfs), Some(31));
-        assert_eq!(grid.shortest_path(Algorithm::Dfs), Some(31));
+    fn test_grid() -> Grid {
+        INPUT.lines().for_each(|l| {
+            println!();
+            l.chars().for_each(|c| print!("{c:^3}"));
+        });
+        println!();
+        let grid = Grid::from_str(INPUT).unwrap();
+        dbg!(&grid);
+        grid
+    }
+
+    #[test]
+    fn small_input_bfs() {
+        assert_eq!(test_grid().shortest_path(Algorithm::Bfs), Some(31));
+    }
+
+    #[test]
+    fn small_input_dfs() {
+        assert_eq!(test_grid().shortest_path(Algorithm::Dfs), Some(31));
     }
 }
