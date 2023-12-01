@@ -27,8 +27,6 @@ Consider your entire calibration document. _What is the sum of all of the calibr
 
 Your puzzle answer was `54605`.
 
-The first half of this puzzle is complete! It provides one gold star: \*
-
 ## \--- Part Two ---
 
 Your calculation isn't quite right. It looks like some of the digits are actually _spelled out with letters_: `one`, `two`, `three`, `four`, `five`, `six`, `seven`, `eight`, and `nine` _also_ count as valid "digits".
@@ -49,4 +47,12 @@ In this example, the calibration values are `29`, `83`, `13`, `24`, `42`, `14`, 
 
 _What is the sum of all of the calibration values?_
 
-Although it hasn't changed, you can still [get your puzzle input](https://adventofcode.com/2023/day/1/input).
+Your puzzle answer was `55429`.
+
+Both parts of this puzzle are complete! They provide two gold stars: \*\*
+
+At this point, you should [return to your Advent calendar](https://adventofcode.com/2023) and try another puzzle.
+
+If you still want to see it, you can [get your puzzle input](https://adventofcode.com/2023/day/1/input).
+
+You can also this puzzle.
