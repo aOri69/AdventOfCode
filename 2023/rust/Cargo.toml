@@ -1,3 +1,6 @@
 [workspace]
 members = ["day_*"]
 resolver = "2"
+
+[dependencies]
+nom = "7.1.3"
