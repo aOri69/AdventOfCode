@@ -2,5 +2,5 @@
 members = ["day_*"]
 resolver = "2"
 
-[dependencies]
+[workspace.dependencies]
 nom = "7.1.3"
