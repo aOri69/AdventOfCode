@@ -5,38 +5,29 @@ use std::{
     ops::{AddAssign, RemAssign},
 };
 
-#[derive(Debug)]
-enum Cube {
-    Red(u32),
-    Green(u32),
-    Blue(u32),
-}
-
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Default)]
-pub struct Bag {
+pub struct Set {
     pub red: u32,
     pub green: u32,
     pub blue: u32,
 }
 
-impl Bag {
-    fn add_cube(&mut self, cube: Cube) {
-        match cube {
-            Cube::Red(n) => self.red += n,
-            Cube::Green(n) => self.green += n,
-            Cube::Blue(n) => self.blue += n,
-        };
-    }
-
-    fn in_bounds(&self, other: &Bag) -> bool {
-        self.red >= other.red && self.green >= other.green && self.blue >= other.blue
+impl Set {
+    fn in_bounds(&self, other: &Set) -> bool {
+        self.red <= other.red && self.green <= other.green && self.blue <= other.blue
     }
 }
 
 #[derive(Debug)]
 struct Game {
     id: u32,
-    sets: Vec<Vec<Cube>>,
+    sets: Vec<Set>,
+}
+
+impl Game {
+    fn is_all_sets_in_bounds(&self, compare_set: &Set) -> bool {
+        self.sets.iter().all(|s| s.in_bounds(compare_set))
+    }
 }
 
 fn parse_game(input: &str) -> Game {
@@ -50,19 +41,19 @@ fn parse_game(input: &str) -> Game {
     let sets = input[idx + 1..]
         .split_terminator(';')
         .map(|set| {
-            set.split_terminator(',')
-                .map(|cube| {
-                    let mut it = cube.split_ascii_whitespace();
-                    let count = it.next().unwrap();
-                    let count = count.parse::<u32>().unwrap();
-                    match it.next().unwrap() {
-                        "red" => Cube::Red(count),
-                        "green" => Cube::Green(count),
-                        "blue" => Cube::Blue(count),
-                        _ => panic!("no such type of cube"),
-                    }
-                })
-                .collect::<Vec<_>>()
+            let mut current_set = Set::default();
+            set.split_terminator(',').for_each(|cube| {
+                let mut it = cube.split_ascii_whitespace();
+                let count = it.next().unwrap();
+                let count = count.parse::<u32>().unwrap();
+                match it.next().unwrap() {
+                    "red" => current_set.red += count,
+                    "green" => current_set.green += count,
+                    "blue" => current_set.blue += count,
+                    _ => panic!("no such type of cube"),
+                }
+            });
+            current_set
         })
         .collect();
 
@@ -82,35 +73,24 @@ impl std::fmt::Debug for PrettyGames<'_> {
     }
 }
 
-pub fn part1(input: &str, bag_limit: Bag) -> u32 {
+pub fn part1(input: &str, bag_limit: Set) -> u32 {
     let games = input.lines().map(parse_game).collect::<Vec<_>>();
-    let mut result = 0;
-    // dbg!(PrettyGames(&games));
-    //
-    for game in games {
-        let cubes = game.sets.into_iter().flat_map(|s| s.into_iter());
-        let mut current_bag = Bag::default();
-        for cube in cubes {
-            current_bag.add_cube(cube);
-        }
-        print!(
-            "{:>3}: {:^2}-{:^2}-{:^2}",
-            game.id, current_bag.red, current_bag.green, current_bag.blue
-        );
-        if bag_limit.in_bounds(&current_bag) {
-            print!(" fits");
-            result += game.id;
-        }
-        println!();
-    }
-    result
+    dbg!(PrettyGames(&games));
+
+    games
+        .iter()
+        .filter_map(|g| match g.is_all_sets_in_bounds(&bag_limit) {
+            true => Some(g.id),
+            false => None,
+        })
+        .sum()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    const BAG_LIMIT: Bag = Bag {
+    const BAG_LIMIT: Set = Set {
         red: 12,
         green: 13,
         blue: 14,

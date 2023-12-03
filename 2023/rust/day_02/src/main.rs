@@ -1,7 +1,7 @@
-use day_02::{part1, Bag};
+use day_02::{part1, Set};
 
 fn main() {
-    const BAG: Bag = Bag {
+    const BAG: Set = Set {
         red: 12,
         green: 13,
         blue: 14,
