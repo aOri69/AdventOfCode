@@ -1,3 +1,7 @@
 [workspace]
 members = ["day_*"]
 resolver = "2"
+
+[workspace.dependencies]
+criterion = { version = "0.5.1", features = ["html_reports"] }
+nom = { version = "*" }

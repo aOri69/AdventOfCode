@@ -2,3 +2,10 @@
 name = "day_02"
 version = "0.1.0"
 edition = "2021"
+
+[dev-dependencies]
+criterion = { workspace = true }
+
+[[bench]]
+name = "part1"
+harness = false
