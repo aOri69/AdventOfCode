@@ -1,4 +1,4 @@
-use day_02::{part1, Set};
+use day_02::{part1, part2, Set};
 
 fn main() {
     const BAG: Set = Set {
@@ -9,4 +9,5 @@ fn main() {
 
     let input = include_str!("input.txt");
     println!("Part 1 answer: {}", part1(input, BAG));
+    println!("Part 2 answer: {}", part2(input));
 }

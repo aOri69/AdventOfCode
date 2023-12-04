@@ -56,3 +56,5 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
 The _power_ of a set of cubes is equal to the numbers of red, green, and blue cubes multiplied together. The power of the minimum set of cubes in game 1 is `48`. In games 2-5 it was `12`, `1560`, `630`, and `36`, respectively. Adding up these five powers produces the sum `_2286_`.
 
 For each game, find the minimum set of cubes that must have been present. _What is the sum of the power of these sets?_
+
+Your puzzle answer was `55593`.
