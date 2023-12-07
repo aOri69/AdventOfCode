@@ -1,5 +1,11 @@
 #![allow(unused)]
 
+use std::collections::HashMap;
+
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
+struct Position(usize, usize);
+type Positions = Vec<Position>;
+
 pub fn part1(input: &str) -> u32 {
     let line_length = input
         .lines()
@@ -69,6 +75,26 @@ fn is_part_number(input: &str, row: usize, col: usize) -> bool {
     is_part_number
 }
 
+fn get_gear_pos(input: &str, row: usize, col: usize) -> Positions {
+    let gears = get_neighbours(row, col)
+        .iter()
+        .filter_map(|(row_n, col_n)| {
+            let c = input
+                .lines()
+                .nth(*row_n)
+                .unwrap_or("")
+                .chars()
+                .nth(*col_n)
+                .unwrap_or('.');
+            match c {
+                '*' => Some(Position(*row_n, *col_n)),
+                _ => None,
+            }
+        })
+        .collect();
+    gears
+}
+
 fn get_ascii_digits_iter(
     line: &str,
 ) -> std::iter::Peekable<impl Iterator<Item = (usize, char)> + '_> {
@@ -98,8 +124,59 @@ fn get_neighbours(row: usize, col: usize) -> Vec<(usize, usize)> {
     .collect()
 }
 
-pub fn part2(_input: &str) -> u32 {
-    todo!("Part 1");
+pub fn part2(input: &str) -> u32 {
+    let line_length = input
+        .lines()
+        .next()
+        .expect("should be at least one line in the input")
+        .len();
+    let line_count = input.lines().count();
+    let mut part_numbers: Vec<u32> = vec![];
+    let mut gears: HashMap<Position, Vec<u32>> = HashMap::new();
+
+    '_rows: for (row, line) in input.lines().enumerate() {
+        let mut cur_col = 0_usize;
+        let mut number = String::new();
+        let mut is_part_flag = false;
+        let mut gear_pos = vec![];
+
+        let mut cols_it = get_ascii_digits_iter(line);
+
+        while let Some((col, c)) = cols_it.next() {
+            if !is_part_flag {
+                is_part_flag = is_part_number(input, row, col);
+                gear_pos = get_gear_pos(input, row, col);
+            }
+
+            if col - cur_col == 1 || cur_col == 0 {
+                number.push(c);
+                cur_col = col;
+            }
+            // Next digit not exitst in the line
+            // Or next digit is too far from current column(different number)
+            if cols_it.peek().is_none() || cols_it.peek().is_some_and(|(c, _)| c.abs_diff(col) > 1)
+            {
+                if is_part_flag {
+                    part_numbers.push(number.parse().unwrap());
+                    gear_pos.iter().for_each(|gp| {
+                        if let Some(gear) = gears.get_mut(gp) {
+                            gear.push(number.parse().unwrap());
+                        } else {
+                            gears.insert(*gp, vec![number.parse().unwrap()]);
+                        };
+                    });
+                    is_part_flag = false;
+                }
+                number.clear();
+                cur_col = 0;
+            }
+        }
+    }
+    // dbg!(&gears);
+    gears
+        .iter()
+        .filter(|(_, v)| v.len() == 2)
+        .fold(0u32, |acc, x| acc + x.1.iter().product::<u32>())
 }
 
 #[cfg(test)]
@@ -137,7 +214,6 @@ mod tests {
 
     #[test]
     fn test_part2() {
-        todo!("test for part 2");
-        // assert_eq!(part2(INPUT), 4361);
+        assert_eq!(part2(INPUT), 467835);
     }
 }
