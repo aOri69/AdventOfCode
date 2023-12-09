@@ -71,3 +71,13 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
 Once all of the originals and copies have been processed, you end up with `_1_` instance of card 1, `_2_` instances of card 2, `_4_` instances of card 3, `_8_` instances of card 4, `_14_` instances of card 5, and `_1_` instance of card 6. In total, this example pile of scratchcards causes you to ultimately have `_30_` scratchcards!
 
 Process all of the original and copied scratchcards until no more scratchcards are won. Including the original set of scratchcards, _how many total scratchcards do you end up with?_
+
+Your puzzle answer was `5037841`.
+
+Both parts of this puzzle are complete! They provide two gold stars: \*\*
+
+At this point, you should [return to your Advent calendar](https://adventofcode.com/2023) and try another puzzle.
+
+If you still want to see it, you can [get your puzzle input](https://adventofcode.com/2023/day/4/input).
+
+You can also this puzzle.

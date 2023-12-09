@@ -12,6 +12,8 @@ pub enum CardParseError {
     #[error("Card number could not be parsed {0}")]
     ParseInt(#[source] std::num::ParseIntError, String),
 }
+
+#[derive(Clone)]
 pub struct Card {
     id: u32,
     win: Vec<u32>,
@@ -31,6 +33,13 @@ impl Card {
                 };
                 acc
             })
+    }
+
+    pub fn matches_count(&self) -> usize {
+        self.win
+            .iter()
+            .filter(|w| self.hand.as_slice().binary_search(w).is_ok())
+            .count()
     }
 
     fn parse_one(card_line: &str) -> Result<Card, CardParseError> {
@@ -64,6 +73,10 @@ impl Card {
                     .map_err(|e| CardParseError::ParseInt(e, n.to_owned()))
             })
             .collect()
+    }
+
+    pub fn id(&self) -> u32 {
+        self.id
     }
 }
 

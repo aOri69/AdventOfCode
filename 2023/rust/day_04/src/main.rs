@@ -1,6 +1,7 @@
 #![allow(unused)]
-
 use card::parse_cards;
+
+use crate::card::Card;
 
 mod card;
 
@@ -11,7 +12,21 @@ fn part1(input: &str) -> u32 {
 }
 
 fn part2(input: &str) -> u32 {
-    todo!("part 2 implementation");
+    let cards = parse_cards(input).expect("Can't parse all cards");
+    let mut cards_amount: Vec<usize> = vec![1; cards.len()];
+
+    for (i, card) in cards.iter().enumerate() {
+        let matches = card.matches_count();
+        let multiplier = cards_amount.get(i).copied().unwrap();
+        for id in (card.id() as usize..card.id() as usize + matches) {
+            if let Some(amount) = cards_amount.get_mut(id) {
+                *amount += 1;
+                (1..multiplier).for_each(|_| *amount += 1);
+            }
+        }
+    }
+    // dbg!(cards_amount);
+    cards_amount.into_iter().sum::<usize>() as u32
 }
 
 fn main() {
@@ -45,6 +60,6 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11";
 
     #[test]
     fn test_part2() {
-        todo!("part2 test");
+        assert_eq!(part2(TEST), 30);
     }
 }
