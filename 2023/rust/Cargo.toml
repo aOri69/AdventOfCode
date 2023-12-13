@@ -5,4 +5,5 @@ resolver = "2"
 [workspace.dependencies]
 criterion = { version = "0.5.1", features = ["html_reports"] }
 nom = { version = "*" }
-thiserror = {version = "1.0.50"}
+thiserror = { version = "1.0.50" }
+rstest = { version = "0.18.2" }

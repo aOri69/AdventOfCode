@@ -1,3 +1,9 @@
+type Seed = u32;
+
+struct Almanac;
+
+mod parser;
+
 pub fn part_1(_input: &str) -> u32 {
     todo!("Part 1 implementation");
 }
