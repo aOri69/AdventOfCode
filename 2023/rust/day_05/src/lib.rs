@@ -1,10 +1,36 @@
-type Seed = u32;
+use std::str::FromStr;
 
-struct Almanac;
+use nom::Finish;
+use parser::{parse_almanac, SeedRange};
+
+type Seed = u32;
+// type SeedRange = std::ops::RangeInclusive<Seed>;
+
+#[derive(Debug)]
+struct Almanac {
+    seeds: Vec<Seed>,
+    ranges: Vec<Vec<SeedRange>>,
+}
+
+impl std::str::FromStr for Almanac {
+    type Err = nom::error::Error<String>;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match parse_almanac(s).finish() {
+            Ok((_remaining, almanac)) => Ok(almanac),
+            Err(nom::error::Error { input, code }) => Err(nom::error::Error {
+                input: input.to_string(),
+                code,
+            }),
+        }
+    }
+}
 
 mod parser;
 
-pub fn part_1(_input: &str) -> u32 {
+pub fn part_1(input: &str) -> u32 {
+    let parsed = Almanac::from_str(input).unwrap();
+    dbg!(parsed);
     todo!("Part 1 implementation");
 }
 
