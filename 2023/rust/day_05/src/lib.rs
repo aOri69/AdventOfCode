@@ -1,36 +1,72 @@
-use std::str::FromStr;
+use std::ops::RangeInclusive;
 
-use nom::Finish;
-use parser::{parse_almanac, SeedRange};
+use crate::parser::{parse_input, ParseResult};
 
-type Seed = u32;
-// type SeedRange = std::ops::RangeInclusive<Seed>;
-
-#[derive(Debug)]
-struct Almanac {
-    seeds: Vec<Seed>,
-    ranges: Vec<Vec<SeedRange>>,
-}
-
-impl std::str::FromStr for Almanac {
-    type Err = nom::error::Error<String>;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match parse_almanac(s).finish() {
-            Ok((_remaining, almanac)) => Ok(almanac),
-            Err(nom::error::Error { input, code }) => Err(nom::error::Error {
-                input: input.to_string(),
-                code,
-            }),
-        }
-    }
-}
+type Seed = u64;
 
 mod parser;
 
+struct Map {
+    source: String,
+    destination: String,
+    ranges: Vec<SeedRange>,
+}
+
+impl std::fmt::Debug for Map {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "{}-to-{} map:", self.source, self.destination)?;
+        self.ranges.iter().try_for_each(|r| writeln!(f, "{r:?}"))?;
+        Ok(())
+    }
+}
+
+#[derive(PartialEq, Eq)]
+struct SeedRange {
+    source_range: RangeInclusive<Seed>,
+    dest_range: RangeInclusive<Seed>,
+}
+
+impl SeedRange {
+    fn get_dest(&self, seed: Seed) -> Seed {
+        todo!();
+    }
+}
+
+impl PartialOrd for SeedRange {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for SeedRange {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.source_range.start().cmp(other.source_range.start())
+    }
+}
+
+impl core::hash::Hash for SeedRange {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.source_range.start().hash(state);
+    }
+}
+
+impl std::fmt::Debug for SeedRange {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "src: {:>11}..={:<11}, dst: {:>11}..={:<11}",
+            self.source_range.start(),
+            self.source_range.end(),
+            self.dest_range.start(),
+            self.dest_range.end()
+        )?;
+        Ok(())
+    }
+}
+
 pub fn part_1(input: &str) -> u32 {
-    let parsed = Almanac::from_str(input).unwrap();
-    dbg!(parsed);
+    let ParseResult { seeds, mut maps } = parse_input(input).unwrap();
+    dbg!(maps);
     todo!("Part 1 implementation");
 }
 
@@ -40,7 +76,6 @@ pub fn part_2(_input: &str) -> u32 {
 
 #[cfg(test)]
 mod tests {
-    #[allow(unused_imports)]
     use super::*;
 
     const INPUT: &str = "seeds: 79 14 55 13

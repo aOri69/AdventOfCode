@@ -7,11 +7,11 @@ edition = "2021"
 
 [dependencies]
 nom.workspace = true
-rstest.workspace = true
 thiserror.workspace = true
 
 [dev-dependencies]
 criterion = { workspace = true }
+rstest.workspace = true
 
 [[bench]]
 name = "part1"
