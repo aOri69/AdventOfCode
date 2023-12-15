@@ -1,4 +1,7 @@
-use std::ops::RangeInclusive;
+use std::{
+    ops::RangeInclusive,
+    sync::{Arc, Mutex},
+};
 
 use crate::parser::{parse_input, ParseResult};
 
@@ -6,6 +9,7 @@ type Seed = u64;
 
 mod parser;
 
+#[derive(Clone)]
 struct Map {
     source: String,
     destination: String,
@@ -37,7 +41,7 @@ impl Map {
     }
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone)]
 struct SeedRange {
     source_range: RangeInclusive<Seed>,
     dest_range: RangeInclusive<Seed>,
@@ -86,7 +90,7 @@ impl std::fmt::Debug for SeedRange {
 
 pub fn part_1(input: &str) -> Seed {
     let ParseResult { seeds, mut maps } = parse_input(input).unwrap();
-    dbg!(&maps);
+    // dbg!(&maps);
     let mut numbers_vec = vec![];
     for seed in seeds {
         let mut current_number = seed;
@@ -98,8 +102,56 @@ pub fn part_1(input: &str) -> Seed {
     numbers_vec.iter().copied().min().unwrap_or_default()
 }
 
-pub fn part_2(_input: &str) -> Seed {
-    todo!("Part 2 implementation");
+pub fn part_2(input: &str) -> Seed {
+    let ParseResult { seeds, maps } = parse_input(input).unwrap();
+    // dbg!(&seeds);
+    // dbg!(&maps);
+    let seeds = seeds_vec_to_ranges(seeds);
+
+    let mut handles = vec![];
+    let min_location = Arc::new(Mutex::new(u64::MAX));
+
+    for seed_range in seeds.into_iter() {
+        let min_mut = Arc::clone(&min_location);
+        let mut maps_copy = maps.clone();
+        let handle = std::thread::spawn(move || {
+            for seed in seed_range {
+                let mut current_number = seed;
+                for map in &mut maps_copy {
+                    current_number = map.get_dest(current_number);
+                }
+                let mut min = min_mut.lock().unwrap();
+                if current_number < *min {
+                    *min = current_number;
+                }
+            }
+        });
+        handles.push(handle);
+
+        // for seed in seed_range {
+        //     let mut current_number = seed;
+        //     for map in &mut maps {
+        //         current_number = map.get_dest(current_number);
+        //     }
+        //     if current_number < min_location {
+        //         min_location = current_number;
+        //     }
+        // }
+    }
+
+    for handle in handles {
+        handle.join().unwrap();
+    }
+
+    let min = *min_location.lock().unwrap();
+    min
+}
+
+fn seeds_vec_to_ranges(seeds: Vec<Seed>) -> Vec<RangeInclusive<Seed>> {
+    seeds
+        .chunks_exact(2)
+        .map(|r| r[0]..=r[0] + r[1] - 1)
+        .collect()
 }
 
 #[cfg(test)]
@@ -147,6 +199,6 @@ humidity-to-location map:
 
     #[test]
     fn test_part_2() {
-        todo!("part2 test function");
+        assert_eq!(part_2(INPUT), 46);
     }
 }

@@ -52,8 +52,8 @@ fn parse_source_to_dest(input: &str) -> IResult<&str, Map> {
     let (input, mut ranges) = many1(map(
         tuple((nom_u64, space1, nom_u64, space1, nom_u64, opt(line_ending))),
         |(destination_start, _, source_start, _, length, _)| SeedRange {
-            source_range: source_start..=source_start + length,
-            dest_range: destination_start..=destination_start + length,
+            source_range: source_start..=source_start + length - 1,
+            dest_range: destination_start..=destination_start + length - 1,
         },
     ))(input)?;
 
