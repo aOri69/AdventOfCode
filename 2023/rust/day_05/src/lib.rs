@@ -20,6 +20,23 @@ impl std::fmt::Debug for Map {
     }
 }
 
+impl Map {
+    fn get_dest(&self, source_num: Seed) -> Seed {
+        let res = self.ranges.iter().as_slice().binary_search_by(|r| {
+            match r.source_range.contains(&source_num) {
+                true => std::cmp::Ordering::Equal,
+                false => r.source_range.start().cmp(&source_num),
+            }
+        });
+        if let Ok(idx) = res {
+            return self.ranges[idx]
+                .get_dest(source_num)
+                .expect("binary search should already find the correct position");
+        }
+        source_num
+    }
+}
+
 #[derive(PartialEq, Eq)]
 struct SeedRange {
     source_range: RangeInclusive<Seed>,
@@ -27,8 +44,11 @@ struct SeedRange {
 }
 
 impl SeedRange {
-    fn get_dest(&self, seed: Seed) -> Seed {
-        todo!();
+    fn get_dest(&self, source_num: Seed) -> Option<Seed> {
+        match self.source_range.contains(&source_num) {
+            true => Some(self.dest_range.start() + (source_num - self.source_range.start())),
+            false => None,
+        }
     }
 }
 
@@ -64,13 +84,21 @@ impl std::fmt::Debug for SeedRange {
     }
 }
 
-pub fn part_1(input: &str) -> u32 {
+pub fn part_1(input: &str) -> Seed {
     let ParseResult { seeds, mut maps } = parse_input(input).unwrap();
-    dbg!(maps);
-    todo!("Part 1 implementation");
+    dbg!(&maps);
+    let mut numbers_vec = vec![];
+    for seed in seeds {
+        let mut current_number = seed;
+        for map in &mut maps {
+            current_number = map.get_dest(current_number);
+        }
+        numbers_vec.push(current_number);
+    }
+    numbers_vec.iter().copied().min().unwrap_or_default()
 }
 
-pub fn part_2(_input: &str) -> u32 {
+pub fn part_2(_input: &str) -> Seed {
     todo!("Part 2 implementation");
 }
 
