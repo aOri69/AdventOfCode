@@ -102,10 +102,8 @@ pub fn part_1(input: &str) -> Seed {
     numbers_vec.iter().copied().min().unwrap_or_default()
 }
 
-pub fn part_2(input: &str) -> Seed {
+pub fn part_2_threaded(input: &str) -> Seed {
     let ParseResult { seeds, maps } = parse_input(input).unwrap();
-    // dbg!(&seeds);
-    // dbg!(&maps);
     let seeds = seeds_vec_to_ranges(seeds);
 
     let mut handles = vec![];
@@ -127,16 +125,6 @@ pub fn part_2(input: &str) -> Seed {
             }
         });
         handles.push(handle);
-
-        // for seed in seed_range {
-        //     let mut current_number = seed;
-        //     for map in &mut maps {
-        //         current_number = map.get_dest(current_number);
-        //     }
-        //     if current_number < min_location {
-        //         min_location = current_number;
-        //     }
-        // }
     }
 
     for handle in handles {
@@ -145,6 +133,63 @@ pub fn part_2(input: &str) -> Seed {
 
     let min = *min_location.lock().unwrap();
     min
+}
+
+pub fn part_2_threaded_mpsc(input: &str) -> Seed {
+    let ParseResult { seeds, maps } = parse_input(input).unwrap();
+    let seeds = seeds_vec_to_ranges(seeds);
+
+    let mut handles = vec![];
+    let (tx, rx) = std::sync::mpsc::channel();
+    let mut min_location = u64::MAX;
+
+    for seed_range in seeds.into_iter() {
+        let mut maps_copy = maps.clone();
+        let tx_copy = tx.clone();
+        let handle = std::thread::spawn(move || {
+            for seed in seed_range {
+                let mut current_number = seed;
+                for map in &mut maps_copy {
+                    current_number = map.get_dest(current_number);
+                }
+                tx_copy.send(current_number).unwrap();
+            }
+        });
+        handles.push(handle);
+    }
+
+    // for handle in handles {
+    //     handle.join().unwrap();
+    // }
+
+    drop(tx);
+    while let Ok(r) = rx.recv() {
+        if r < min_location {
+            min_location = r;
+        }
+    }
+
+    min_location
+}
+
+pub fn part_2_single(input: &str) -> Seed {
+    let ParseResult { seeds, maps } = parse_input(input).unwrap();
+    let seeds = seeds_vec_to_ranges(seeds);
+
+    let mut min_location = u64::MAX;
+
+    for seed_range in seeds.into_iter() {
+        for seed in seed_range {
+            let mut current_number = seed;
+            for map in &maps {
+                current_number = map.get_dest(current_number);
+            }
+            if current_number < min_location {
+                min_location = current_number;
+            }
+        }
+    }
+    min_location
 }
 
 fn seeds_vec_to_ranges(seeds: Vec<Seed>) -> Vec<RangeInclusive<Seed>> {
@@ -199,6 +244,8 @@ humidity-to-location map:
 
     #[test]
     fn test_part_2() {
-        assert_eq!(part_2(INPUT), 46);
+        assert_eq!(part_2_threaded(INPUT), 46);
+        assert_eq!(part_2_single(INPUT), 46);
+        assert_eq!(part_2_threaded_mpsc(INPUT), 46);
     }
 }
