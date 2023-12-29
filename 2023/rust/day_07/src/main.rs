@@ -1,10 +1,10 @@
-use day_07::parse_hands;
+use day_07::part1;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let input = include_str!("input.txt");
 
-    let hands = parse_hands(input)?;
-    println!("{hands:#?}");
+    let answer = part1(input);
+    println!("Part 1 answer: {answer}");
 
     Ok(())
 }
