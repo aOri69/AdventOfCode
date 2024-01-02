@@ -8,17 +8,49 @@ pub fn part1(input: &str) -> usize {
     let mut hands = parse_hands(input).expect("expected successful parsing");
 
     hands.sort_by(|a, b| {
-        dbg!(a, b, a.compare(b));
+        // dbg!(a, b, a.compare(b));
         a.compare(b)
     });
 
-    dbg!(&hands);
+    // dbg!(&hands);
+
+    // use std::fs::OpenOptions;
+    // use std::io::prelude::*;
+
+    // let mut file = OpenOptions::new()
+    //     .write(true)
+    //     .append(true)
+    //     .create(true)
+    //     .open("part1_debug.txt")
+    //     .unwrap();
 
     let result = hands.iter().enumerate().fold(0, |acc, (index, hand)| {
-        dbg!(acc, hand, index + 1, hand.bid() * (index + 1));
-        dbg!(acc + (hand.bid() * (index + 1)))
+        // dbg!(acc, hand, index + 1, hand.bid() * (index + 1));
+        // dbg!(acc + (hand.bid() * (index + 1)));
+
+        // let s = format!(
+        //     "hand = {:?}, bid = {}, index = {}",
+        //     hand,
+        //     // acc,
+        //     hand.bid(),
+        //     index + 1
+        // );
+        // writeln!(file, "{}", s).unwrap();
+        acc + (hand.bid() * (index + 1))
     });
     result
+}
+
+pub fn part2(_input: &str) -> usize {
+    // let mut hands = parse_hands(input).expect("expected successful parsing");
+    // hands.sort_by(|a, b| a.compare(b));
+
+    // let result = hands
+    //     .iter()
+    //     .enumerate()
+    //     .fold(0, |acc, (index, hand)| acc + (hand.bid() * (index + 1)));
+    // result
+    todo!("Part 2 not ready yet");
 }
 
 #[cfg(test)]

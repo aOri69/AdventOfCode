@@ -8,3 +8,4 @@ nom = { version = "*" }
 thiserror = { version = "1.0.50" }
 rstest = { version = "0.18.2" }
 pretty_assertions = { version = "*" }
+miette = { version = "5", features = ["fancy"] }
