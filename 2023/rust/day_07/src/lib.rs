@@ -1,56 +1,27 @@
 mod hand;
-
-use hand::parse_hands;
+mod hand_jocker;
 
 /// Now, you can determine the total winnings of this set of hands
 /// by adding up the result of multiplying each hand's bid with its rank
 pub fn part1(input: &str) -> usize {
+    use hand::parse_hands;
     let mut hands = parse_hands(input).expect("expected successful parsing");
-
-    hands.sort_by(|a, b| {
-        // dbg!(a, b, a.compare(b));
-        a.compare(b)
-    });
-
-    // dbg!(&hands);
-
-    // use std::fs::OpenOptions;
-    // use std::io::prelude::*;
-
-    // let mut file = OpenOptions::new()
-    //     .write(true)
-    //     .append(true)
-    //     .create(true)
-    //     .open("part1_debug.txt")
-    //     .unwrap();
-
-    let result = hands.iter().enumerate().fold(0, |acc, (index, hand)| {
-        // dbg!(acc, hand, index + 1, hand.bid() * (index + 1));
-        // dbg!(acc + (hand.bid() * (index + 1)));
-
-        // let s = format!(
-        //     "hand = {:?}, bid = {}, index = {}",
-        //     hand,
-        //     // acc,
-        //     hand.bid(),
-        //     index + 1
-        // );
-        // writeln!(file, "{}", s).unwrap();
-        acc + (hand.bid() * (index + 1))
-    });
-    result
+    hands.sort_by(|a, b| a.compare(b));
+    hands
+        .iter()
+        .enumerate()
+        .fold(0, |acc, (index, hand)| acc + (hand.bid() * (index + 1)))
 }
 
-pub fn part2(_input: &str) -> usize {
-    // let mut hands = parse_hands(input).expect("expected successful parsing");
-    // hands.sort_by(|a, b| a.compare(b));
-
-    // let result = hands
-    //     .iter()
-    //     .enumerate()
-    //     .fold(0, |acc, (index, hand)| acc + (hand.bid() * (index + 1)));
-    // result
-    todo!("Part 2 not ready yet");
+pub fn part2(input: &str) -> usize {
+    use hand_jocker::parse_hands;
+    let mut hands = parse_hands(input).expect("expected successful parsing");
+    hands.sort_by(|a, b| a.compare(b));
+    let result = hands
+        .iter()
+        .enumerate()
+        .fold(0, |acc, (index, hand)| acc + (hand.bid() * (index + 1)));
+    result
 }
 
 #[cfg(test)]
@@ -67,8 +38,13 @@ KK677 28
 KTJJT 220
 QQQJA 483";
     #[test]
-    fn hand_type_test() {
+    fn hand_type_test_part1() {
         assert_eq!(part1(TEST), 6440);
+    }
+
+    #[test]
+    fn hand_type_test_part2() {
+        assert_eq!(part2(TEST), 5905);
     }
 
     #[test]
