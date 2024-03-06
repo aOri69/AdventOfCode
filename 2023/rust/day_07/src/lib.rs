@@ -1,5 +1,7 @@
+mod card;
+mod error;
 mod hand;
-mod hand_jocker;
+mod hand_type;
 
 /// Now, you can determine the total winnings of this set of hands
 /// by adding up the result of multiplying each hand's bid with its rank
@@ -13,15 +15,8 @@ pub fn part1(input: &str) -> usize {
         .fold(0, |acc, (index, hand)| acc + (hand.bid() * (index + 1)))
 }
 
-pub fn part2(input: &str) -> usize {
-    use hand_jocker::parse_hands;
-    let mut hands = parse_hands(input).expect("expected successful parsing");
-    hands.sort_by(|a, b| a.compare(b));
-    let result = hands
-        .iter()
-        .enumerate()
-        .fold(0, |acc, (index, hand)| acc + (hand.bid() * (index + 1)));
-    result
+pub fn part2(_input: &str) -> usize {
+    todo!("refactoring")
 }
 
 #[cfg(test)]
