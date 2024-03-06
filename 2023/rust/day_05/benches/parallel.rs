@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use day_05::{part_2_single, part_2_threaded, part_2_threaded_mpsc};
 
