@@ -1,7 +1,5 @@
 use std::{cmp, mem};
 
-use crate::card::Card;
-
 /// Every hand is exactly one type. From strongest to weakest, they are:
 /// Five of a kind, where all five cards have the same label: AAAAA
 /// Four of a kind, where four cards have the same label and one card has a different label: AA8AA
@@ -12,17 +10,17 @@ use crate::card::Card;
 /// High card, where all cards' labels are distinct: 23456
 #[derive(Clone, Copy)]
 #[repr(u8)]
-pub enum HandType {
-    HighCard(Card),
-    OnePair(Card),
-    TwoPair(Card, Card),
-    ThreeOfAKind(Card),
-    FullHouse(Card, Card),
-    FourOfAKind(Card),
-    FiveOfAKind(Card),
+pub enum HandType<T> {
+    HighCard(T),
+    OnePair(T),
+    TwoPair(T, T),
+    ThreeOfAKind(T),
+    FullHouse(T, T),
+    FourOfAKind(T),
+    FiveOfAKind(T),
 }
 
-impl HandType {
+impl<T> HandType<T> {
     #[allow(dead_code)]
     fn discriminant(&self) -> u8 {
         // SAFETY: Because `Self` is marked `repr(u8)`, its layout is a `repr(C)` `union`
@@ -44,27 +42,30 @@ impl HandType {
     }
 }
 
-impl PartialEq for HandType {
+impl<T> PartialEq for HandType<T> {
     fn eq(&self, other: &Self) -> bool {
         mem::discriminant(self).eq(&mem::discriminant(other))
     }
 }
 
-impl Eq for HandType {}
+impl<T> Eq for HandType<T> {}
 
-impl Ord for HandType {
+impl<T> Ord for HandType<T> {
     fn cmp(&self, other: &Self) -> cmp::Ordering {
         self.discriminant_safe().cmp(&other.discriminant_safe())
     }
 }
 
-impl PartialOrd for HandType {
+impl<T> PartialOrd for HandType<T> {
     fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl std::fmt::Debug for HandType {
+impl<T> std::fmt::Debug for HandType<T>
+where
+    T: std::fmt::Debug,
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::HighCard(arg0) => write!(f, "HighCard({arg0:?})"),

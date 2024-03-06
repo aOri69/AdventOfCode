@@ -17,24 +17,24 @@ pub enum Card {
     A = 14,
 }
 
-pub mod jocker {
-    #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-    pub enum Card {
-        J = 2,
-        Two = 3,
-        Three = 4,
-        Four = 5,
-        Five = 6,
-        Six = 7,
-        Seven = 8,
-        Eight = 9,
-        Nine = 10,
-        T = 11,
-        Q = 12,
-        K = 13,
-        A = 14,
-    }
-}
+// pub mod jocker {
+//     #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
+//     pub enum Card {
+//         J = 2,
+//         Two = 3,
+//         Three = 4,
+//         Four = 5,
+//         Five = 6,
+//         Six = 7,
+//         Seven = 8,
+//         Eight = 9,
+//         Nine = 10,
+//         T = 11,
+//         Q = 12,
+//         K = 13,
+//         A = 14,
+//     }
+// }
 
 impl TryFrom<char> for Card {
     type Error = ParseError;

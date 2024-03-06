@@ -13,7 +13,7 @@ impl Hand {
         Self { cards, bid }
     }
 
-    pub fn hand_type(&self) -> HandType {
+    pub fn hand_type(&self) -> HandType<Card> {
         let mut cards_to_count: Vec<(Card, i32)> = Vec::with_capacity(5);
         self.cards.iter().for_each(|c| {
             let entry = cards_to_count.iter_mut().find(|&&mut (card, _)| card.eq(c));
