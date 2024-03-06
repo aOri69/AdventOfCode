@@ -13,7 +13,7 @@ use nom::{
     sequence::{delimited, preceded, separated_pair, terminated, tuple},
     IResult,
 };
-pub use operation::{Operation, OperationError, Value, ValueError};
+pub use operation::{Operation, OperationError, Value};
 pub use test::Test;
 
 pub type WorryLevel = u64;
