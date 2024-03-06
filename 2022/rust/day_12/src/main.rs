@@ -167,7 +167,7 @@ impl Grid {
 // Parsing impls
 impl Grid {
     fn get_grid_match_coord(grid: &[Vec<Node>], node_to_find: Node) -> Coord {
-        let width = grid.get(0).unwrap().len();
+        let width = grid.first().unwrap().len();
         let flatten_coord = match node_to_find {
             Node::Start => Grid::get_flatten_start(grid),
             Node::End => Grid::get_flatten_end(grid),
