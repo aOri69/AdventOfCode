@@ -17,24 +17,49 @@ pub enum Card {
     A = 14,
 }
 
-// pub mod jocker {
-//     #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-//     pub enum Card {
-//         J = 2,
-//         Two = 3,
-//         Three = 4,
-//         Four = 5,
-//         Five = 6,
-//         Six = 7,
-//         Seven = 8,
-//         Eight = 9,
-//         Nine = 10,
-//         T = 11,
-//         Q = 12,
-//         K = 13,
-//         A = 14,
-//     }
-// }
+pub mod jocker {
+    use crate::error::ParseError;
+
+    #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
+    pub enum Card {
+        J = 2,
+        Two = 3,
+        Three = 4,
+        Four = 5,
+        Five = 6,
+        Six = 7,
+        Seven = 8,
+        Eight = 9,
+        Nine = 10,
+        T = 11,
+        Q = 12,
+        K = 13,
+        A = 14,
+    }
+
+    impl TryFrom<char> for Card {
+        type Error = ParseError;
+
+        fn try_from(c: char) -> Result<Self, Self::Error> {
+            match c {
+                '2' => Ok(Self::Two),
+                '3' => Ok(Self::Three),
+                '4' => Ok(Self::Four),
+                '5' => Ok(Self::Five),
+                '6' => Ok(Self::Six),
+                '7' => Ok(Self::Seven),
+                '8' => Ok(Self::Eight),
+                '9' => Ok(Self::Nine),
+                'T' => Ok(Self::T),
+                'J' => Ok(Self::J),
+                'Q' => Ok(Self::Q),
+                'K' => Ok(Self::K),
+                'A' => Ok(Self::A),
+                c => Err(ParseError::UnsupportedSymbol(c)),
+            }
+        }
+    }
+}
 
 impl TryFrom<char> for Card {
     type Error = ParseError;

@@ -7,6 +7,7 @@ mod hand_type;
 /// by adding up the result of multiplying each hand's bid with its rank
 pub fn part1(input: &str) -> usize {
     use hand::parse_hands;
+
     let mut hands = parse_hands(input).expect("expected successful parsing");
     hands.sort_by(|a, b| a.compare(b));
     hands
@@ -15,8 +16,15 @@ pub fn part1(input: &str) -> usize {
         .fold(0, |acc, (index, hand)| acc + (hand.bid() * (index + 1)))
 }
 
-pub fn part2(_input: &str) -> usize {
-    todo!("refactoring")
+pub fn part2(input: &str) -> usize {
+    use hand::parse_hands_with_jockers;
+
+    let mut hands = parse_hands_with_jockers(input).expect("expected successful parsing");
+    hands.sort_by(|a, b| a.compare(b));
+    hands
+        .iter()
+        .enumerate()
+        .fold(0, |acc, (index, hand)| acc + (hand.bid() * (index + 1)))
 }
 
 #[cfg(test)]
