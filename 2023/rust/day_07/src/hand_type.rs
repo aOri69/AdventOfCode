@@ -1,4 +1,8 @@
-use std::{cmp, mem};
+use std::cmp;
+
+pub trait Valuable {
+    fn value(&self) -> u8;
+}
 
 /// Every hand is exactly one type. From strongest to weakest, they are:
 /// Five of a kind, where all five cards have the same label: AAAAA
@@ -10,17 +14,23 @@ use std::{cmp, mem};
 /// High card, where all cards' labels are distinct: 23456
 #[derive(Clone, Copy)]
 #[repr(u8)]
-pub enum HandType<T> {
-    HighCard(T),
-    OnePair(T),
-    TwoPair(T, T),
-    ThreeOfAKind(T),
+pub enum HandType<T>
+where
+    T: Valuable,
+{
+    HighCard(T) = 0,
+    OnePair(T) = 50,
+    TwoPair(T, T) = 100,
+    ThreeOfAKind(T) = 150,
     FullHouse(T, T),
     FourOfAKind(T),
-    FiveOfAKind(T),
+    FiveOfAKind(T) = 241,
 }
 
-impl<T> HandType<T> {
+impl<T> HandType<T>
+where
+    T: Valuable,
+{
     #[allow(dead_code)]
     fn discriminant(&self) -> u8 {
         // SAFETY: Because `Self` is marked `repr(u8)`, its layout is a `repr(C)` `union`
@@ -29,8 +39,20 @@ impl<T> HandType<T> {
         unsafe { *<*const _>::from(self).cast::<u8>() }
     }
 
-    fn discriminant_safe(&self) -> u8 {
+    /// A2345 -> A = 14
+    /// AA345 -> AA = 1000 + 14 = 1014
+    /// AA3KK -> AAKK = 2000 + 14 + 13 = 2027
+    /// etc...
+    #[allow(clippy::identity_op)]
+    fn discriminant_safe(&self) -> u16 {
         match self {
+            // HandType::HighCard(c) => (0 + c.value()) as u16,
+            // HandType::OnePair(c) => 1000u16 + c.value() as u16,
+            // HandType::TwoPair(c1, c2) => 2000u16 + c1.value() as u16 + c2.value() as u16,
+            // HandType::ThreeOfAKind(c) => 3000u16 + c.value() as u16,
+            // HandType::FullHouse(c1, c2) => 4000u16 + c1.value() as u16 + c2.value() as u16,
+            // HandType::FourOfAKind(c) => 5000u16 + c.value() as u16,
+            // HandType::FiveOfAKind(c) => 6000u16 + c.value() as u16,
             HandType::HighCard(_) => 0,
             HandType::OnePair(_) => 1,
             HandType::TwoPair(_, _) => 2,
@@ -42,21 +64,34 @@ impl<T> HandType<T> {
     }
 }
 
-impl<T> PartialEq for HandType<T> {
+impl<T> PartialEq for HandType<T>
+where
+    T: Valuable,
+{
     fn eq(&self, other: &Self) -> bool {
-        mem::discriminant(self).eq(&mem::discriminant(other))
+        // Not working correctly.
+        // in case of different cards inside TwoPair(T,U).cmp(TwoPair(Z,K))
+        // will return true
+        // std::mem::discriminant(self).eq(&std::mem::discriminant(other))
+        self.discriminant_safe().eq(&other.discriminant_safe())
     }
 }
 
-impl<T> Eq for HandType<T> {}
+impl<T> Eq for HandType<T> where T: Valuable {}
 
-impl<T> Ord for HandType<T> {
+impl<T> Ord for HandType<T>
+where
+    T: Valuable,
+{
     fn cmp(&self, other: &Self) -> cmp::Ordering {
         self.discriminant_safe().cmp(&other.discriminant_safe())
     }
 }
 
-impl<T> PartialOrd for HandType<T> {
+impl<T> PartialOrd for HandType<T>
+where
+    T: Valuable,
+{
     fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
         Some(self.cmp(other))
     }
@@ -64,7 +99,7 @@ impl<T> PartialOrd for HandType<T> {
 
 impl<T> std::fmt::Debug for HandType<T>
 where
-    T: std::fmt::Debug,
+    T: std::fmt::Debug + Valuable,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
