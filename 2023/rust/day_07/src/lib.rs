@@ -17,15 +17,33 @@ enum HandError {
     SplitError(String),
 }
 
+const NO_JOCKER: bool = false;
+const WITH_JOCKER: bool = true;
+
 struct Hand {
     cards: [Card; 5],
     bid: usize,
 }
 
 impl Hand {
-    fn hand_type(&self) -> HandType<Card> {
-        let mut cards = self.cards;
+    fn mask_jocker(&self) -> [Card; 5] {
+        if !self.cards.contains(&'J'.try_into().unwrap()) {
+            return self.cards;
+        }
+
+        todo!()
+    }
+}
+
+impl Hand {
+    fn hand_type(&self, use_jocker: bool) -> HandType<Card> {
+        let mut cards;
+        cards = match use_jocker {
+            true => self.mask_jocker(),
+            false => self.cards,
+        };
         cards.sort();
+
         // CHARS count in hand
         let occurences = [
             cards.iter().filter(|&&c| c == cards[0]).count(),
@@ -76,7 +94,14 @@ impl Hand {
         self.bid
     }
 
-    fn compare(&self, other: &Hand) -> std::cmp::Ordering {
+    fn compare_no_jocker(&self, other: &Hand) -> std::cmp::Ordering {
+        match self.hand_type(NO_JOCKER).cmp(&other.hand_type(NO_JOCKER)) {
+            std::cmp::Ordering::Equal => self.compare_high_card(other),
+            ord => ord,
+        }
+    }
+
+    fn compare_with_jocker(&self, other: &Hand) -> std::cmp::Ordering {
         // For debug purposes
         // let result = match self.hand_type().cmp(&other.hand_type()) {
         //     std::cmp::Ordering::Equal => self.compare_high_card(other),
@@ -84,7 +109,10 @@ impl Hand {
         // };
         // dbg!(self, other, &result);
         // result
-        match self.hand_type().cmp(&other.hand_type()) {
+        match self
+            .hand_type(WITH_JOCKER)
+            .cmp(&other.hand_type(WITH_JOCKER))
+        {
             std::cmp::Ordering::Equal => self.compare_high_card(other),
             ord => ord,
         }
@@ -161,7 +189,7 @@ fn parse_hands(input: &str) -> Result<Vec<Hand>, HandError> {
 pub fn part1(input: &str) -> usize {
     let mut hands = parse_hands(input).expect("expected succesfully parse input");
     // hands.sort_by_key(|h| h.hand_type());
-    hands.sort_by(Hand::compare);
+    hands.sort_by(Hand::compare_no_jocker);
     // dbg!(&hands);
     hands
         .into_iter()
@@ -170,8 +198,13 @@ pub fn part1(input: &str) -> usize {
 }
 
 pub fn part2(input: &str) -> usize {
-    let _hands = parse_hands(input).expect("expected succesfully parse input");
-    todo!("part2")
+    let mut hands = parse_hands(input).expect("expected succesfully parse input");
+    hands.sort_by(Hand::compare_with_jocker);
+    // dbg!(&hands);
+    hands
+        .into_iter()
+        .enumerate()
+        .fold(0, |acc, (i, h)| acc + (h.bid() * (i + 1)))
 }
 
 #[cfg(test)]
@@ -180,6 +213,7 @@ mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
     use rstest::rstest;
+    use std::cmp::Ordering;
     // use HandType::*;
 
     type HT = HandType<Card>;
@@ -189,8 +223,6 @@ T55J5 684
 KK677 28
 KTJJT 220
 QQQJA 483";
-
-    const REAL_INPUT_PATH: &str = "input.txt";
 
     #[test]
     fn part1_small() {
@@ -223,40 +255,43 @@ QQQJA 483";
     #[case::three_of_a_kind("5T5J5", HT::ThreeOfAKind('5'.try_into().unwrap()))]
     #[case::three_of_a_kind("55TJ5", HT::ThreeOfAKind('5'.try_into().unwrap()))]
     #[case::three_of_a_kind("J5T55", HT::ThreeOfAKind('5'.try_into().unwrap()))]
-    #[case::five_of_a_kind("AAAAA", HT::FiveOfAKind('A'.try_into().unwrap()))]
-    #[case::five_of_a_kind("JJJJJ", HT::FiveOfAKind('J'.try_into().unwrap()))]
     #[case::four_of_a_kind("AA2AA", HT::FourOfAKind('A'.try_into().unwrap()))]
     #[case::four_of_a_kind("2AAAA", HT::FourOfAKind('A'.try_into().unwrap()))]
     #[case::four_of_a_kind("AAAA2", HT::FourOfAKind('A'.try_into().unwrap()))]
-    fn hand_type(#[case] input: &str, #[case] expected: HandType<Card>) {
+    #[case::five_of_a_kind("AAAAA", HT::FiveOfAKind('A'.try_into().unwrap()))]
+    #[case::five_of_a_kind("JJJJJ", HT::FiveOfAKind('J'.try_into().unwrap()))]
+    fn hand_type_no_j(#[case] input: &str, #[case] expected: HandType<Card>) {
         let input = input.to_owned() + " 0";
         let hand = Hand::from_str(&input).unwrap();
-        let hand_type = hand.hand_type();
+        let hand_type = hand.hand_type(NO_JOCKER);
         assert_eq!(hand_type, expected);
     }
 
     #[rstest]
-    fn part1_real() {
-        assert_eq!(
-            part1(
-                std::fs::read_to_string(REAL_INPUT_PATH)
-                    .expect("Expected real input")
-                    .as_str()
-            ),
-            250232501
-        );
+    #[case::four_of_a_kind("QJJQ2", HT::FourOfAKind('Q'.try_into().unwrap()))]
+    #[case::four_of_a_kind("JKKK2", HT::FourOfAKind('K'.try_into().unwrap()))]
+    fn hand_type_j(#[case] input: &str, #[case] expected: HandType<Card>) {
+        let input = input.to_owned() + " 0";
+        let hand = Hand::from_str(&input).unwrap();
+        let hand_type = hand.hand_type(WITH_JOCKER);
+        assert_eq!(hand_type, expected);
     }
 
     #[rstest]
-    fn part2_real() {
-        // todo!()
-        assert_eq!(
-            part2(
-                std::fs::read_to_string(REAL_INPUT_PATH)
-                    .expect("Expected real input")
-                    .as_str()
-            ),
-            0
-        );
+    #[case("QJJQ2", "JKKK2", NO_JOCKER, Ordering::Less)]
+    #[case("QJJQ2", "JKKK2", WITH_JOCKER, Ordering::Greater)]
+    fn compare(
+        #[case] lhs: &str,
+        #[case] rhs: &str,
+        #[case] use_jocker: bool,
+        #[case] expected: std::cmp::Ordering,
+    ) {
+        let lhs = Hand::from_str(&(lhs.to_owned() + " 0")).unwrap();
+        let rhs = Hand::from_str(&(rhs.to_owned() + " 0")).unwrap();
+        let comparison_result = match use_jocker {
+            true => lhs.compare_with_jocker(&rhs),
+            false => lhs.compare_no_jocker(&rhs),
+        };
+        assert_eq!(comparison_result, expected);
     }
 }
