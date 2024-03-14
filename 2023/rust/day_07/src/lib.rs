@@ -31,7 +31,26 @@ impl Hand {
             return self.cards;
         }
 
-        todo!()
+        let replace_with = match self.hand_type(NO_JOCKER) {
+            HandType::HighCard(c) => c,
+            HandType::OnePair(c) => c,
+            HandType::TwoPair(c1, c2) => match c1.cmp(&c2) {
+                std::cmp::Ordering::Less => c2,
+                std::cmp::Ordering::Equal => c1,
+                std::cmp::Ordering::Greater => c1,
+            },
+            HandType::ThreeOfAKind(c) => c,
+            HandType::FullHouse(c1, _) => c1,
+            HandType::FourOfAKind(c) => c,
+            HandType::FiveOfAKind(_) => return self.cards,
+        };
+
+        let mut result = self.cards;
+        result
+            .iter_mut()
+            .filter(|c| *c == &Card('J'))
+            .for_each(|c| *c = replace_with);
+        result
     }
 }
 
@@ -85,7 +104,22 @@ impl Hand {
             [2, 2, 1, 1, 1] => {
                 HandType::OnePair(cards[occurences.iter().position(|p| *p == 2).unwrap()])
             }
-            [1, 1, 1, 1, 1] => HandType::HighCard(*cards.iter().max().unwrap()),
+            // High card should always be counted from the original hand
+            // Furthermore J should have value 2 when USE_JOCKER and 12 when NO_JOCKER
+            [1, 1, 1, 1, 1] => HandType::HighCard(
+                *self
+                    .cards
+                    .iter()
+                    .map(|c| match use_jocker {
+                        true => match c {
+                            Card(c) if *c == 'J' => &Card('2'),
+                            c => c,
+                        },
+                        false => c,
+                    })
+                    .max()
+                    .unwrap(),
+            ),
             _ => unreachable!(),
         }
     }

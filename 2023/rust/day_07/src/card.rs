@@ -1,7 +1,7 @@
 use crate::{hand_type::Valuable, HandError};
 
 #[derive(PartialEq, Eq, Clone, Copy, Hash)]
-pub(super) struct Card(char);
+pub(super) struct Card(pub(super) char);
 
 impl Valuable for Card {
     /// Instead of using enum:
