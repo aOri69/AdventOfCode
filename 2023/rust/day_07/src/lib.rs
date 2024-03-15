@@ -169,21 +169,13 @@ impl Hand {
 
     fn compare_with_jocker(&self, other: &Hand) -> std::cmp::Ordering {
         // For debug purposes
-        let result = match self
+        match self
             .hand_type(WITH_JOCKER)
             .cmp(&other.hand_type(WITH_JOCKER))
         {
             std::cmp::Ordering::Equal => self.compare_high_card(other, WITH_JOCKER),
             ord => ord,
-        };
-        // dbg!(
-        //     self,
-        //     self.hand_type(WITH_JOCKER),
-        //     other,
-        //     other.hand_type(WITH_JOCKER),
-        //     &result
-        // );
-        result
+        }
     }
 
     fn compare_high_card(&self, other: &Hand, use_jocker: bool) -> std::cmp::Ordering {
