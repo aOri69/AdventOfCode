@@ -83,3 +83,5 @@ QQQJA 483
 With the new joker rule, the total winnings in this example are `_5905_`.
 
 Using the new joker rule, find the rank of every hand in your set. _What are the new total winnings?_
+
+Your puzzle answer was `249138943`.
