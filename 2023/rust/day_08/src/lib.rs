@@ -28,7 +28,7 @@ impl std::fmt::Debug for Network {
     }
 }
 
-fn parse_input(input: &'static str) -> Network {
+fn parse_network(input: &'static str) -> Network {
     let mut input_it = input.lines();
 
     Network {
@@ -42,6 +42,11 @@ fn parse_input(input: &'static str) -> Network {
             })
             .collect(),
     }
+}
+
+pub fn part1(input: &'static str) -> usize {
+    let _network = parse_network(input);
+    todo!();
 }
 
 #[cfg(test)]
@@ -107,7 +112,7 @@ ZZZ = (ZZZ, ZZZ)";
                 },
             ],
         };
-        assert_eq!(parse_input(TEST_INPUT1), expected);
+        assert_eq!(parse_network(TEST_INPUT1), expected);
     }
 
     #[test]
@@ -132,6 +137,6 @@ ZZZ = (ZZZ, ZZZ)";
                 },
             ],
         };
-        assert_eq!(parse_input(TEST_INPUT2), expected);
+        assert_eq!(parse_network(TEST_INPUT2), expected);
     }
 }
