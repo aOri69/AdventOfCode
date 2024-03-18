@@ -79,34 +79,6 @@ impl<'a> Iterator for NetworkIter<'a> {
             }
         }
     }
-
-    //     if let Some(current_node) = self.current_node {
-    //         if current_node.name == END_NODE {
-    //             return None;
-    //         }
-
-    //         let result = match self.command_it.next() {
-    //             Some(c) => match c {
-    //                 'L' => self.network.nodes.get(&Node {
-    //                     name: current_node.left,
-    //                     left: "",
-    //                     right: "",
-    //                 }),
-    //                 'R' => self.network.nodes.get(&Node {
-    //                     name: current_node.right,
-    //                     left: "",
-    //                     right: "",
-    //                 }),
-    //                 _ => unreachable!(),
-    //             },
-    //             None => return None,
-    //         };
-    //         self.current_node = result;
-    //         return result;
-    //     }
-
-    //     self.current_node
-    // }
 }
 
 #[derive(PartialEq)]
