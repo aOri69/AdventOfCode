@@ -126,8 +126,12 @@ fn parse_network(input: &'static str) -> Network {
 
 pub fn part1(input: &'static str) -> usize {
     let network = parse_network(input);
-    dbg!(&network);
     network.iter().count() - 1
+}
+
+pub fn part2(input: &'static str) -> usize {
+    let _network = parse_network(input);
+    todo!();
 }
 
 #[cfg(test)]
