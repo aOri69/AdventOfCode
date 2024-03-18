@@ -30,12 +30,11 @@ impl std::fmt::Debug for Network {
 
 fn parse_input(input: &'static str) -> Network {
     let mut input_it = input.lines();
-    let commands = input_it.next().expect("expected first row with commands");
-    let input_it = input_it.skip(1);
 
     Network {
-        commands,
+        commands: input_it.next().expect("expected first row with commands"),
         nodes: input_it
+            .skip(1)
             .map(|s| Node {
                 name: &s[..3],
                 left: &s[7..10],
