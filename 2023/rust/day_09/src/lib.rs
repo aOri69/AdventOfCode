@@ -12,6 +12,20 @@ pub fn part1(input: &str) -> i32 {
     values.into_iter().map(|vh| predict_next_value(&vh)).sum()
 }
 
+pub fn part2(input: &str) -> i32 {
+    let values = input
+        .lines()
+        .map(|l| {
+            l.split_ascii_whitespace()
+                .map(|n| n.parse::<i32>())
+                .collect::<Result<Vec<_>, _>>()
+        })
+        .collect::<Result<Vec<_>, _>>()
+        .expect("expected valid input");
+
+    values.into_iter().map(|vh| predict_prev_value(&vh)).sum()
+}
+
 fn predict_next_value(value_history: &[i32]) -> i32 {
     let deltas = get_deltas(value_history);
     let mut prediction = 0;
@@ -20,7 +34,20 @@ fn predict_next_value(value_history: &[i32]) -> i32 {
         // println!("{delta:?}");
         prediction += delta.last().unwrap();
     }
-    println!();
+    // println!();
+
+    prediction
+}
+
+fn predict_prev_value(value_history: &[i32]) -> i32 {
+    let deltas = get_deltas(value_history);
+    let mut prediction = 0;
+
+    for delta in deltas.into_iter().rev() {
+        // println!("{delta:?}");
+        prediction = delta.first().unwrap() - prediction;
+    }
+    // println!();
 
     prediction
 }
@@ -59,5 +86,11 @@ mod tests {
     fn part1_test_input() {
         let result = part1(TEST_INPUT);
         assert_eq!(result, 114);
+    }
+
+    #[test]
+    fn part2_test_input() {
+        let result = part2(TEST_INPUT.lines().last().unwrap());
+        assert_eq!(result, 5);
     }
 }
