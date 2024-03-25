@@ -9,7 +9,7 @@ pub fn part1(input: &str) -> i32 {
         .collect::<Result<Vec<_>, _>>()
         .expect("expected valid input");
 
-    values.into_iter().map(|vh| predict_next_value(&vh)).sum()
+    values.into_iter().map(|vh| predict_values(&vh).1).sum()
 }
 
 pub fn part2(input: &str) -> i32 {
@@ -23,33 +23,21 @@ pub fn part2(input: &str) -> i32 {
         .collect::<Result<Vec<_>, _>>()
         .expect("expected valid input");
 
-    values.into_iter().map(|vh| predict_prev_value(&vh)).sum()
+    values.into_iter().map(|vh| predict_values(&vh).0).sum()
 }
 
-fn predict_next_value(value_history: &[i32]) -> i32 {
+fn predict_values(value_history: &[i32]) -> (i32, i32) {
     let deltas = get_deltas(value_history);
-    let mut prediction = 0;
+    let (mut prediction_left, mut prediction_right) = (0, 0);
 
     for delta in deltas.into_iter().rev().skip(1) {
         // println!("{delta:?}");
-        prediction += delta.last().unwrap();
+        prediction_left = delta.first().unwrap() - prediction_left;
+        prediction_right += delta.last().unwrap();
     }
     // println!();
 
-    prediction
-}
-
-fn predict_prev_value(value_history: &[i32]) -> i32 {
-    let deltas = get_deltas(value_history);
-    let mut prediction = 0;
-
-    for delta in deltas.into_iter().rev() {
-        // println!("{delta:?}");
-        prediction = delta.first().unwrap() - prediction;
-    }
-    // println!();
-
-    prediction
+    (prediction_left, prediction_right)
 }
 
 fn get_deltas(value_history: &[i32]) -> Vec<Vec<i32>> {
