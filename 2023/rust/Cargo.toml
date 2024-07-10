@@ -6,6 +6,6 @@ resolver = "2"
 criterion = { version = "0.5.1", features = ["html_reports"] }
 nom = { version = "*" }
 thiserror = { version = "1.0.50" }
-rstest = { version = "0.18.2" }
+rstest = { version = "0.21" }
 pretty_assertions = { version = "*" }
 miette = { version = "7", features = ["fancy"] }
