@@ -9,3 +9,4 @@ thiserror = { version = "1.0.50" }
 rstest = { version = "0.21" }
 pretty_assertions = { version = "*" }
 miette = { version = "7", features = ["fancy"] }
+anyhow = { version = "1.0.86" }
