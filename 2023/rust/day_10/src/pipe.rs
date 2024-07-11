@@ -41,6 +41,16 @@ impl BfsSearch {
     pub fn search_finished_mut(&mut self) -> &mut bool {
         &mut self.search_finished
     }
+
+    pub fn longest_route_in_loop(&self) -> usize {
+        *self
+            .distances
+            .values()
+            .collect::<Vec<_>>()
+            .into_iter()
+            .max()
+            .unwrap_or(&0usize)
+    }
 }
 
 pub type SurfaceRow = Vec<SurfaceType>;

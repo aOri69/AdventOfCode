@@ -39,15 +39,7 @@ pub fn solve_parts(input: &str) -> Result<(usize, usize)> {
         restore_terminal()?;
     }
 
-    let result = surface
-        .search()
-        .distances()
-        .values()
-        .collect::<Vec<_>>()
-        .into_iter()
-        .max()
-        .unwrap_or(&0);
-    Ok((*result, 0))
+    Ok((surface.search().longest_route_in_loop(), 0))
 }
 
 #[cfg(test)]
