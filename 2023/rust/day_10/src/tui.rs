@@ -24,24 +24,9 @@ use ratatui::{
     Terminal,
 };
 
-use crate::pipe::{build_surface, Coords, Surface};
+use crate::pipe::{Coords, Surface};
 
-pub fn run_tui(input: &str) -> Result<()> {
-    chain_hook();
-    let terminal = init_terminal()?;
-
-    let mut app = AppBuilder::default()
-        .with_surface_source(input)?
-        .with_tick_rate(Duration::from_millis(1))
-        .build();
-
-    app.run_tui(terminal)?;
-
-    restore_terminal()?;
-    Ok(())
-}
-
-fn init_terminal() -> Result<Terminal<CrosstermBackend<io::Stdout>>> {
+pub fn init_terminal() -> Result<Terminal<CrosstermBackend<io::Stdout>>> {
     crossterm::execute!(io::stdout(), crossterm::terminal::EnterAlternateScreen)?;
     enable_raw_mode()?;
 
@@ -53,14 +38,14 @@ fn init_terminal() -> Result<Terminal<CrosstermBackend<io::Stdout>>> {
     Ok(terminal)
 }
 
-fn restore_terminal() -> Result<()> {
+pub fn restore_terminal() -> Result<()> {
     disable_raw_mode()?;
     crossterm::execute!(io::stdout(), LeaveAlternateScreen)?;
 
     Ok(())
 }
 
-pub(super) fn chain_hook() {
+pub fn chain_hook() {
     let original_hook = std::panic::take_hook();
 
     std::panic::set_hook(Box::new(move |panic| {
@@ -80,8 +65,8 @@ enum AppState {
     Running,
 }
 
-pub struct App {
-    surface: Surface,
+pub struct App<'a> {
+    surface: &'a mut Surface,
     timer: Instant,
     vertical_scroll: usize,
     state: AppState,
@@ -89,7 +74,7 @@ pub struct App {
     log: String,
 }
 
-impl App {
+impl<'a> App<'a> {
     pub fn run_tui(&mut self, mut terminal: Terminal<impl Backend>) -> Result<()> {
         let mut last_tick = Instant::now();
 
@@ -175,7 +160,7 @@ impl App {
     }
 }
 
-impl Widget for &mut App {
+impl<'a> Widget for &mut App<'a> {
     fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
     where
         Self: Sized,
@@ -207,7 +192,7 @@ impl Widget for &mut App {
 }
 
 // Widgets implementation
-impl App {
+impl<'a> App<'a> {
     fn text(&self) -> Paragraph {
         // Main text paragraph
         let text = self
@@ -283,16 +268,17 @@ impl App {
     }
 }
 
-#[derive(Default)]
-pub struct AppBuilder {
-    surface: Surface,
+pub struct AppBuilder<'a> {
+    surface: &'a mut Surface,
     tick_rate: Duration,
 }
 
-impl AppBuilder {
-    pub fn with_surface_source(mut self, surface_source: &str) -> Result<Self> {
-        self.surface = build_surface(surface_source)?;
-        Ok(self)
+impl<'a> AppBuilder<'a> {
+    pub fn new(surface: &'a mut Surface) -> Self {
+        Self {
+            surface,
+            tick_rate: Duration::from_millis(16),
+        }
     }
 
     pub fn with_tick_rate(mut self, tick_rate: Duration) -> Self {
@@ -300,7 +286,7 @@ impl AppBuilder {
         self
     }
 
-    pub fn build(self) -> App {
+    pub fn build(self) -> App<'a> {
         let _width = match &self.surface.first() {
             Some(row) => row.len(),
             None => 0,
@@ -312,10 +298,7 @@ impl AppBuilder {
             timer: Instant::now(),
             vertical_scroll: 0,
             state: AppState::Running,
-            tick_rate: match self.tick_rate.is_zero() {
-                true => Duration::from_millis(16),
-                false => self.tick_rate,
-            },
+            tick_rate: self.tick_rate,
             log: String::new(),
         }
     }

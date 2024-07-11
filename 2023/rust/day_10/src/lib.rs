@@ -1,7 +1,9 @@
+use std::time::Duration;
+
 use anyhow::{Ok, Result};
 use pipe::build_surface;
 use thiserror::Error;
-use tui::run_tui;
+use tui::{chain_hook, init_terminal, restore_terminal, AppBuilder};
 pub mod pipe;
 mod tui;
 
@@ -24,20 +26,28 @@ pub fn solve_parts(input: &str) -> Result<(usize, usize)> {
             surface.update();
             // dbg!(surface.search().queue());
         }
-        let result = surface
-            .search()
-            .distances()
-            .values()
-            .collect::<Vec<_>>()
-            .into_iter()
-            .max()
-            .unwrap_or(&0);
-        dbg!(&result);
-        Ok((*result, 0))
     } else {
-        run_tui(input)?;
-        Ok((0, 0))
+        chain_hook();
+        let terminal = init_terminal()?;
+
+        let mut app = AppBuilder::new(&mut surface)
+            .with_tick_rate(Duration::from_millis(1))
+            .build();
+
+        app.run_tui(terminal)?;
+
+        restore_terminal()?;
     }
+
+    let result = surface
+        .search()
+        .distances()
+        .values()
+        .collect::<Vec<_>>()
+        .into_iter()
+        .max()
+        .unwrap_or(&0);
+    Ok((*result, 0))
 }
 
 #[cfg(test)]
