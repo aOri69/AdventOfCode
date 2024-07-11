@@ -12,6 +12,7 @@ use crossterm::{
     event::{self, Event, KeyCode},
     terminal::{disable_raw_mode, enable_raw_mode, LeaveAlternateScreen},
 };
+use queue::Queue;
 use ratatui::{
     backend::{Backend, CrosstermBackend},
     layout::{Constraint, Layout, Margin},
@@ -24,10 +25,7 @@ use ratatui::{
     Terminal,
 };
 
-use crate::{
-    pipe::{build_surface, Coords, Surface},
-    queue::Queue,
-};
+use crate::pipe::{build_surface, Coords, Surface};
 
 pub fn run_tui(input: &str) -> Result<()> {
     chain_hook();
