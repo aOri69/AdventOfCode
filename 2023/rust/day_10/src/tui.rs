@@ -12,7 +12,6 @@ use crossterm::{
     event::{self, Event, KeyCode},
     terminal::{disable_raw_mode, enable_raw_mode, LeaveAlternateScreen},
 };
-use queue::Queue;
 use ratatui::{
     backend::{Backend, CrosstermBackend},
     layout::{Constraint, Layout, Margin},
@@ -81,33 +80,12 @@ enum AppState {
     Running,
 }
 
-#[derive(Default)]
-struct BfsSearch {
-    initialised: bool,
-    visited: std::collections::HashSet<Coords>,
-    queue: Queue<Coords>,
-    distances: std::collections::HashMap<Coords, usize>,
-}
-
-impl BfsSearch {
-    fn init(&mut self, start_pos: Coords) {
-        if self.visited.is_empty() && self.queue.is_empty() {
-            self.visited.insert(start_pos);
-            self.queue.enqueue(start_pos);
-            self.distances.insert(start_pos, 0);
-            self.initialised = true;
-        }
-    }
-}
-
 pub struct App {
     surface: Surface,
     timer: Instant,
     vertical_scroll: usize,
     state: AppState,
     tick_rate: Duration,
-    position: Coords,
-    search: BfsSearch,
     log: String,
 }
 
@@ -193,57 +171,7 @@ impl App {
     }
 
     fn update(&mut self) {
-        use crate::pipe::*;
-        // Init search. One time job only
-        if !self.search.initialised {
-            self.search.init(self.position);
-        }
-        // Extract the node and explore it
-        if let Some(node_coords) = self.search.queue.dequeue() {
-            let pipe = &self.surface[node_coords.row][node_coords.col];
-
-            // Mark as visited
-            self.search.visited.insert(node_coords);
-
-            // Get children and put the unvisited ones to queue
-            let children = get_directions_for_pipe(&self.surface, node_coords);
-
-            self.log = format!("current pipe: ---> {pipe} <--- {node_coords:?}\n");
-            // self.log
-            //     .push_str(&format!("visited: {:?}\n", self.search.visited));
-            self.log
-                .push_str(&format!("queue: {:?}\n", self.search.queue));
-            self.log.push_str(&format!("children: {children:?}\n"));
-
-            let unvisited_neighbours = children
-                .into_iter()
-                .filter(|child_coord| !self.search.visited.contains(child_coord))
-                .collect::<Vec<_>>();
-
-            self.log
-                .push_str(&format!("unvisited_neighbours: {unvisited_neighbours:?}\n"));
-
-            unvisited_neighbours.into_iter().for_each(|child_coord| {
-                let current_distance = self
-                    .search
-                    .distances
-                    .get(&node_coords)
-                    .expect("Expected to have previous nodes in the map");
-                self.search
-                    .distances
-                    .insert(child_coord, *current_distance + 1);
-                self.search.queue.enqueue(child_coord)
-            });
-
-            let distances = self.search.distances.values().collect::<Vec<_>>();
-            self.log
-                .push_str(&format!("distances: {:?}\n", distances.iter().max()));
-        } else {
-            self.log = "Search finished.\n".into();
-            let distances = self.search.distances.values().collect::<Vec<_>>();
-            self.log
-                .push_str(&format!("distances: {:?}\n", distances.iter().max()));
-        }
+        self.surface.update();
     }
 }
 
@@ -292,11 +220,11 @@ impl App {
                     .map(|(j, surface)| match surface {
                         crate::pipe::SurfaceType::Pipe(_) => {
                             let coords = Coords { row: i, col: j };
-                            if self.search.visited.contains(&coords) {
+                            if self.surface.search().visited().contains(&coords) {
                                 surface.to_span().green()
-                            } else if Some(&coords) == self.search.queue.peek() {
+                            } else if Some(&coords) == self.surface.search().queue().peek() {
                                 surface.to_span().red()
-                            } else if self.search.queue.contains(&coords) {
+                            } else if self.surface.search().queue().contains(&coords) {
                                 surface.to_span().yellow()
                             } else {
                                 surface.to_span().white()
@@ -357,14 +285,13 @@ impl App {
 
 #[derive(Default)]
 pub struct AppBuilder {
-    position: Coords,
     surface: Surface,
     tick_rate: Duration,
 }
 
 impl AppBuilder {
     pub fn with_surface_source(mut self, surface_source: &str) -> Result<Self> {
-        (self.position, self.surface) = build_surface(surface_source)?;
+        self.surface = build_surface(surface_source)?;
         Ok(self)
     }
 
@@ -381,10 +308,7 @@ impl AppBuilder {
         let _height = self.surface.len();
 
         App {
-            position: self.position,
             surface: self.surface,
-            // surface_width: width,
-            // surface_height: height,
             timer: Instant::now(),
             vertical_scroll: 0,
             state: AppState::Running,
@@ -392,7 +316,6 @@ impl AppBuilder {
                 true => Duration::from_millis(16),
                 false => self.tick_rate,
             },
-            search: BfsSearch::default(),
             log: String::new(),
         }
     }
