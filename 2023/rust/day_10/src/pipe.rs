@@ -149,37 +149,32 @@ impl Surface {
             Ground => vec![],
             StartingPositon => {
                 let mut result: Vec<_> = Vec::new();
-
-                match surface[left.unwrap().row][left.unwrap().col]
-                    .to_string()
-                    .as_str()
-                {
-                    UP_LEFT | DOWN_LEFT | HORIZONTAL => result.push(left),
-                    _ => (),
-                };
-                match surface[upper.unwrap().row][upper.unwrap().col]
-                    .to_string()
-                    .as_str()
-                {
-                    VERTICAL | DOWN_RIGHT | DOWN_LEFT => result.push(upper),
-                    _ => (),
+                if let Some(left) = left {
+                    match surface[left.row][left.col].to_string().as_str() {
+                        UP_LEFT | DOWN_LEFT | HORIZONTAL => result.push(Some(left)),
+                        _ => (),
+                    };
                 }
-                match surface[right.unwrap().row][right.unwrap().col]
-                    .to_string()
-                    .as_str()
-                {
-                    UP_LEFT | DOWN_LEFT | HORIZONTAL => result.push(right),
-                    _ => (),
+                if let Some(upper) = upper {
+                    match surface[upper.row][upper.col].to_string().as_str() {
+                        VERTICAL | DOWN_RIGHT | DOWN_LEFT => result.push(Some(upper)),
+                        _ => (),
+                    }
                 }
-                match surface[lower.unwrap().row][lower.unwrap().col]
-                    .to_string()
-                    .as_str()
-                {
-                    VERTICAL | UP_RIGHT | UP_LEFT => result.push(lower),
-                    _ => (),
+                if let Some(right) = right {
+                    match surface[right.row][right.col].to_string().as_str() {
+                        UP_LEFT | DOWN_LEFT | HORIZONTAL => result.push(Some(right)),
+                        _ => (),
+                    }
                 }
-                if surface[lower.unwrap().row][lower.unwrap().col].is_pipe() {
-                    result.push(left);
+                if let Some(lower) = lower {
+                    match surface[lower.row][lower.col].to_string().as_str() {
+                        VERTICAL | UP_RIGHT | UP_LEFT => result.push(Some(lower)),
+                        _ => (),
+                    }
+                    if surface[lower.row][lower.col].is_pipe() {
+                        result.push(left);
+                    }
                 }
                 result
             }
