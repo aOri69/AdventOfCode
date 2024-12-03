@@ -21,7 +21,8 @@
     "rust-analyzer.check.command": "clippy",
     "rust-analyzer.linkedProjects": [
         // "2022/rust/Cargo.toml",
-        "2023/rust/Cargo.toml"
+        // "2023/rust/Cargo.toml",
+        "2024/rust/Cargo.toml"
     ],
     "debug.toolBarLocation": "commandCenter",
     "git.autofetch": true,
