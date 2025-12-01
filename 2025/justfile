@@ -1,0 +1,8 @@
+# use PowerShell instead of sh:
+set shell := ["powershell.exe", "-c"]
+
+create day:
+    cargo generate --path {{justfile_directory()}}/daily_template --name {{day}}
+
+check:
+    bacon clippy
