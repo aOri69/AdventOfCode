@@ -24,9 +24,9 @@
     "rust-analyzer.inlayHints.maxLength": null,
     "rust-analyzer.check.command": "clippy",
     "rust-analyzer.linkedProjects": [
-        // "2022/rust/Cargo.toml",
-        // "2023/rust/Cargo.toml",
-        // "2024/rust/Cargo.toml",
+        // "2022/Cargo.toml",
+        // "2023/Cargo.toml",
+        // "2024/Cargo.toml",
         "2025/Cargo.toml",
     ],
     "debug.toolBarLocation": "commandCenter",
