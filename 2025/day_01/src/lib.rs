@@ -86,17 +86,30 @@ pub fn part1(input: &str) -> usize {
     dial.points_to_zero_times()
 }
 
-pub fn part2(_: &str) -> usize {
-    todo!();
+pub fn part2(input: &str) -> usize {
+    let mut dial = Dial::new(DIAL_START);
+
+    for line in input.lines() {
+        let (direction, steps) = line.split_at(1);
+        let steps = steps.parse::<usize>().expect("Expected to parse integer");
+
+        for _step in 0..steps {
+            let _current_dial_value = match direction {
+                "L" => dial.left_by(1),
+                "R" => dial.right_by(1),
+                _ => panic!("Expected to parse the input"),
+            };
+        }
+    }
+
+    dial.points_to_zero_times()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    #[test]
-    fn test_part1() {
-        const TEST: &str = "L68
+    const TEST: &str = "L68
 L30
 R48
 L5
@@ -106,6 +119,14 @@ L1
 L99
 R14
 L82";
+
+    #[test]
+    fn test_part1() {
         assert_eq!(part1(TEST), 3);
+    }
+
+    #[test]
+    fn test_part2() {
+        assert_eq!(part2(TEST), 6);
     }
 }
