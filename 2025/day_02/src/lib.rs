@@ -24,6 +24,7 @@ fn prepare_ranges(input: &str) -> Vec<IdRange> {
             let left = range_it
                 .next()
                 .expect("Expected to get lower value of the range")
+                .trim_ascii()
                 .parse::<Id>()
                 .expect("Expected number");
             let right = range_it
@@ -67,8 +68,8 @@ fn is_id_invalid(id: Id) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rstest::rstest;
     use pretty_assertions::assert_eq;
+    use rstest::rstest;
 
     const TEST: &str = "11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,2121212118-2121212124";
 
