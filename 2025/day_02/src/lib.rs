@@ -11,9 +11,14 @@ pub fn part1(input: &str) -> usize {
     invalid_ids_sum
 }
 
-pub fn part2(_input: &str) -> usize {
-    // todo!("Part 2 implementation");
-    0
+pub fn part2(input: &str) -> usize {
+    let ranges = prepare_ranges(input);
+    let mut invalid_ids_sum = 0usize;
+    for range in ranges {
+        let invalid_ids = get_invalid_ids_part2(range);
+        invalid_ids_sum += invalid_ids.iter().sum::<Id>();
+    }
+    invalid_ids_sum
 }
 
 fn prepare_ranges(input: &str) -> Vec<IdRange> {
@@ -56,6 +61,37 @@ fn is_id_invalid(id: Id) -> bool {
     lhs == rhs
 }
 
+fn get_invalid_ids_part2(range: IdRange) -> Vec<Id> {
+    range
+        .filter(|value| match is_id_invalid_part2(*value) {
+            true => true,
+            false => false,
+        })
+        .collect()
+}
+
+fn is_id_invalid_part2(id: Id) -> bool {
+    let id_str = id.to_string();
+    if id_str.len() < 2 {
+        return false;
+    }
+
+    for div in 1..=id_str.len() / 2 {
+        let chars = id_str.as_str().chars().collect::<Vec<_>>();
+        let chunks = chars
+            .chunks(div)
+            .map(|chunk| chunk.iter().collect::<String>())
+            .collect::<Vec<_>>();
+        if chunks
+            .iter()
+            .all(|item| item == chunks.first().expect("expected non empty vec"))
+        {
+            return true;
+        }
+    }
+    false
+}
+
 /// 11-22 has two invalid IDs, 11 and 22.
 /// 95-115 has one invalid ID, 99.
 /// 998-1012 has one invalid ID, 1010.
@@ -68,7 +104,7 @@ fn is_id_invalid(id: Id) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use pretty_assertions::assert_eq;
+    // use pretty_assertions::assert_eq;
     use rstest::rstest;
 
     const TEST: &str = "11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,2121212118-2121212124";
