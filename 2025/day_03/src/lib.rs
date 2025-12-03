@@ -1,0 +1,110 @@
+type Joltage = u32;
+
+#[derive(Debug)]
+struct Bank(Vec<Joltage>);
+
+impl Bank {
+    fn new(items: Vec<Joltage>) -> Self {
+        Self(items)
+    }
+
+    fn get_max_joltage(&self) -> Joltage {
+        let first_max;
+        let second_max;
+        let (max_idx, max_val) = self
+            .0
+            .as_slice()
+            .iter()
+            .enumerate()
+            .max_by(|x, y| x.1.cmp(y.1))
+            .expect("expected to find the maximum");
+
+        if max_idx == self.0.len() - 1 {
+            second_max = *max_val;
+            let mut bank_copy = self.0.clone();
+            let _ = bank_copy.remove(max_idx);
+            first_max = *bank_copy.iter().max().expect("expected to find the max");
+        } else {
+            first_max = *max_val;
+            second_max = *self
+                .0
+                .get(max_idx + 1..)
+                .expect("expected to get the slice")
+                .iter()
+                .max()
+                .expect("expected to find the max");
+        };
+
+        (first_max.to_string() + second_max.to_string().as_str())
+            .parse::<Joltage>()
+            .expect("expected to parse two digit number")
+    }
+}
+
+pub fn part1(input: &str) -> Joltage {
+    let banks = input
+        .lines()
+        .map(|line| {
+            Bank::new(
+                line.chars()
+                    .map(|c| c.to_digit(10).expect("expected a digit"))
+                    .collect::<Vec<_>>(),
+            )
+        })
+        .collect::<Vec<_>>();
+
+    banks
+        .iter()
+        .map(|b| b.get_max_joltage())
+        .inspect(|max| {
+            dbg!(max);
+        })
+        .sum()
+}
+
+pub fn part2(input: &str) -> Joltage {
+    todo!("Part 2 implementation");
+}
+
+/// - In **98**7654321111111, you can make the largest joltage possible, 98, by turning on the first two batteries.
+/// - In **8**1111111111111**9**, you can make the largest joltage possible by turning on the batteries labeled 8 and 9, producing 89 jolts.
+/// - In 2342342342342**78**, you can make 78 by turning on the last two batteries (marked 7 and 8).
+/// - In 818181**9**1111**2**111, the largest joltage you can produce is 92.
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pretty_assertions::assert_eq;
+    use rstest::rstest;
+
+    const TEST: &str = "987654321111111
+811111111111119
+234234234234278
+818181911112111";
+
+    #[test]
+    fn test_part1() {
+        assert_eq!(part1(TEST), 357)
+    }
+
+    #[test]
+    fn test_part2() {
+        todo!("Part 2 UT");
+    }
+
+    #[rstest]
+    #[case("987654321111111", 98)]
+    #[case("811111111111119", 89)]
+    #[case("234234234234278", 78)]
+    #[case("818181911112111", 92)]
+    fn test_part1_vec_of_invalid_ids(#[case] input: &str, #[case] expected: Joltage) {
+        let max = Bank::new(
+            input
+                .chars()
+                .map(|c| c.to_digit(10).expect("expected a digit"))
+                .collect::<Vec<_>>(),
+        )
+        .get_max_joltage();
+
+        assert_eq!(max, expected);
+    }
+}

@@ -9,6 +9,7 @@ pub fn part2(input: &str) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::rstest;
 
     const TEST: &str = "";
 
@@ -20,5 +21,11 @@ mod tests {
     #[test]
     fn test_part2() {
         todo!("Part 2 UT");
+    }
+
+    #[rstest]
+    #[case("test", "test")]
+    fn test_part1_case(#[case] input: &str, #[case] expected: &str) {
+        todo!()
     }
 }
