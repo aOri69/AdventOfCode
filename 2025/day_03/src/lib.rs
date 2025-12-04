@@ -11,33 +11,39 @@ impl Bank {
     fn get_max_joltage(&self) -> Joltage {
         let first_max;
         let second_max;
-        let (max_idx, max_val) = self
-            .0
-            .as_slice()
-            .iter()
-            .enumerate()
-            .max_by(|x, y| x.1.cmp(y.1))
-            .expect("expected to find the maximum");
+        let (max_idx, max_val) =
+            Bank::get_max(self.0.as_slice()).expect("Expected to find the maximum");
 
         if max_idx == self.0.len() - 1 {
-            second_max = *max_val;
+            second_max = max_val;
             let mut bank_copy = self.0.clone();
             let _ = bank_copy.remove(max_idx);
             first_max = *bank_copy.iter().max().expect("expected to find the max");
         } else {
-            first_max = *max_val;
-            second_max = *self
-                .0
-                .get(max_idx + 1..)
-                .expect("expected to get the slice")
-                .iter()
-                .max()
-                .expect("expected to find the max");
+            first_max = max_val;
+            second_max = Bank::get_max(
+                self.0
+                    .get(max_idx + 1..)
+                    .expect("expected to get the slice"),
+            )
+            .expect("Expected to get second max")
+            .1; // Accessing second field in the tuple(we don't need index this time)
         };
 
         (first_max.to_string() + second_max.to_string().as_str())
             .parse::<Joltage>()
             .expect("expected to parse two digit number")
+    }
+
+    fn get_max(slice: &[Joltage]) -> Option<(usize, Joltage)> {
+        slice
+            .iter()
+            .enumerate()
+            .fold(None, |acc, (i, &j)| match acc {
+                None => Some((i, j)),
+                Some((_, next_j)) if j > next_j => Some((i, j)),
+                Some(tuple) => Some(tuple),
+            })
     }
 }
 
@@ -56,13 +62,13 @@ pub fn part1(input: &str) -> Joltage {
     banks
         .iter()
         .map(|b| b.get_max_joltage())
-        .inspect(|max| {
-            dbg!(max);
-        })
+        // .inspect(|max| {
+        //     dbg!(max);
+        // })
         .sum()
 }
 
-pub fn part2(input: &str) -> Joltage {
+pub fn part2(_input: &str) -> Joltage {
     todo!("Part 2 implementation");
 }
 
@@ -96,6 +102,7 @@ mod tests {
     #[case("811111111111119", 89)]
     #[case("234234234234278", 78)]
     #[case("818181911112111", 92)]
+    #[case("8992", 99)]
     fn test_part1_vec_of_invalid_ids(#[case] input: &str, #[case] expected: Joltage) {
         let max = Bank::new(
             input
