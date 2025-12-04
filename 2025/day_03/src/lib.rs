@@ -1,4 +1,4 @@
-type Joltage = u32;
+type Joltage = u64;
 
 #[derive(Debug)]
 struct Bank(Vec<Joltage>);
@@ -53,29 +53,32 @@ pub fn part1(input: &str) -> Joltage {
         .map(|line| {
             Bank::new(
                 line.chars()
-                    .map(|c| c.to_digit(10).expect("expected a digit"))
+                    .map(|c| c.to_digit(10).expect("expected a digit") as Joltage)
                     .collect::<Vec<_>>(),
             )
         })
         .collect::<Vec<_>>();
 
-    banks
-        .iter()
-        .map(|b| b.get_max_joltage())
-        // .inspect(|max| {
-        //     dbg!(max);
-        // })
-        .sum()
+    banks.iter().map(|b| b.get_max_joltage()).sum()
 }
 
 pub fn part2(_input: &str) -> Joltage {
     todo!("Part 2 implementation");
 }
 
+/// # Part 1
+///
 /// - In **98**7654321111111, you can make the largest joltage possible, 98, by turning on the first two batteries.
 /// - In **8**1111111111111**9**, you can make the largest joltage possible by turning on the batteries labeled 8 and 9, producing 89 jolts.
 /// - In 2342342342342**78**, you can make 78 by turning on the last two batteries (marked 7 and 8).
 /// - In 818181**9**1111**2**111, the largest joltage you can produce is 92.
+///
+/// # Part 2
+///
+/// - In `_987654321111_111`, the largest joltage can be found by turning on everything except some `1`s at the end to produce `_987654321111_`.
+/// - In the digit sequence `_81111111111_111_9_`, the largest joltage can be found by turning on everything except some `1`s, producing `_811111111119_`.
+/// - In `23_4_2_34234234278_`, the largest joltage can be found by turning on everything except a `2` battery, a `3` battery, and another `2` battery near the start to produce `_434234234278_`.
+/// - In `_8_1_8_1_8_1_911112111_`, the joltage `_888911112111_` is produced by turning on everything except some `1`s near the front.
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -94,7 +97,7 @@ mod tests {
 
     #[test]
     fn test_part2() {
-        todo!("Part 2 UT");
+        assert_eq!(part2(TEST), 3121910778619)
     }
 
     #[rstest]
@@ -107,7 +110,25 @@ mod tests {
         let max = Bank::new(
             input
                 .chars()
-                .map(|c| c.to_digit(10).expect("expected a digit"))
+                .map(|c| c.to_digit(10).expect("expected a digit") as Joltage)
+                .collect::<Vec<_>>(),
+        )
+        .get_max_joltage();
+
+        assert_eq!(max, expected);
+    }
+
+    #[rstest]
+    #[case("987654321111111", 987654321111)]
+    #[case("811111111111119", 811111111119)]
+    #[case("234234234234278", 434234234278)]
+    #[case("818181911112111", 888911112111)]
+    #[case("8992", 99)]
+    fn test_part2_vec_of_invalid_ids(#[case] input: &str, #[case] expected: Joltage) {
+        let max = Bank::new(
+            input
+                .chars()
+                .map(|c| c.to_digit(10).expect("expected a digit") as Joltage)
                 .collect::<Vec<_>>(),
         )
         .get_max_joltage();
