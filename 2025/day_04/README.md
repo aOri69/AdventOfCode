@@ -46,8 +46,6 @@ Consider your complete diagram of the paper roll locations. _How many rolls of p
 
 Your puzzle answer was `1533`.
 
-The first half of this puzzle is complete! It provides one gold star: \*
-
 ## \--- Part Two ---
 
 Now, the Elves just need help accessing as much of the paper as they can.
@@ -182,6 +180,12 @@ Stop once no more rolls of paper are accessible by a forklift. In this example, 
 
 Start with your original diagram. _How many rolls of paper in total can be removed by the Elves and their forklifts?_
 
-Although it hasn't changed, you can still [get your puzzle input](https://adventofcode.com/2025/day/4/input).
+Your puzzle answer was `9206`.
+
+Both parts of this puzzle are complete! They provide two gold stars: \*\*
+
+At this point, you should [return to your Advent calendar](https://adventofcode.com/2025) and try another puzzle.
+
+If you still want to see it, you can [get your puzzle input](https://adventofcode.com/2025/day/4/input).
 
 You can also this puzzle.
