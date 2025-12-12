@@ -41,8 +41,6 @@ Process the database file from the new inventory management system. _How many of
 
 Your puzzle answer was `613`.
 
-The first half of this puzzle is complete! It provides one gold star: \*
-
 ## \--- Part Two ---
 
 The Elves start bringing their spoiled inventory to the trash chute at the back of the kitchen.
@@ -62,6 +60,12 @@ The ingredient IDs that these ranges consider to be fresh are `3`, `4`, `5`, `10
 
 Process the database file again. _How many ingredient IDs are considered to be fresh according to the fresh ingredient ID ranges?_
 
-Although it hasn't changed, you can still [get your puzzle input](https://adventofcode.com/2025/day/5/input).
+Your puzzle answer was `336495597913098`.
+
+Both parts of this puzzle are complete! They provide two gold stars: \*\*
+
+At this point, you should [return to your Advent calendar](https://adventofcode.com/2025) and try another puzzle.
+
+If you still want to see it, you can [get your puzzle input](https://adventofcode.com/2025/day/5/input).
 
 You can also this puzzle.
