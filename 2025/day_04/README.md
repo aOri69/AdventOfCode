@@ -12,7 +12,7 @@ The rolls of paper (`@`) are arranged on a large grid; the Elves even have a hel
 
 For example:
 
-```text
+```python
 ..@@.@@@@.
 @@@.@.@.@@
 @@@@@.@.@@
@@ -29,7 +29,7 @@ The forklifts can only access a roll of paper if there are _fewer than four roll
 
 In this example, there are `_13_` rolls of paper that can be accessed by a forklift (marked with `x`):
 
-```text
+```kotlin
 ..xx.xx@x.
 x@@.@.@.@@
 @@@@@.x.@@
@@ -54,7 +54,7 @@ Once a roll of paper can be accessed by a forklift, it can be _removed_. Once a 
 
 Starting with the same example as above, here is one way you could remove as many rolls of paper as possible, using highlighted `_@_` to indicate that a roll of paper is about to be removed, and using `x` to indicate that a roll of paper was just removed:
 
-```text
+```kotlin
 Initial state:
 ..@@.@@@@.
 @@@.@.@.@@
