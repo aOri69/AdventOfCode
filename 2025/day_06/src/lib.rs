@@ -12,6 +12,14 @@ impl Operator {
             _ => unreachable!("Not implemented for anything but + and *"),
         }
     }
+
+    fn apply_from_vec(&self, numbers: &[usize]) -> usize {
+        numbers.iter().fold(0usize, |acc, x| match x {
+            x if acc == 0 => *x,
+            x => self.apply(acc, *x),
+            // _ => panic!("should not be operator"),
+        })
+    }
 }
 
 #[derive(Debug)]
@@ -71,18 +79,57 @@ pub fn part1(input: &str) -> usize {
     result
 }
 
-pub fn part2(_input: &str) -> usize {
-    todo!("Part 2 implementation");
+#[allow(clippy::needless_range_loop)]
+pub fn part2(input: &str) -> usize {
+    let input = input
+        .split('\n')
+        .filter(|l| !l.is_empty())
+        .map(|l| l.chars().collect())
+        .collect::<Vec<Vec<char>>>();
+
+    let rows = input.len();
+    let cols = input[0].len();
+
+    let mut result = 0;
+    let mut numbers = vec![];
+
+    for col in (0..cols).rev() {
+        let mut number = String::with_capacity(rows - 1);
+        for row in 0..rows - 1 {
+            // dbg!(&input[row][col]);
+            number.push(input[row][col]);
+        }
+        let number = number.trim();
+        if !number.is_empty() {
+            numbers.push(usize::from_str(number).expect("expected to parse the number"));
+            // dbg!(&number);
+        }
+        result += match input[rows - 1][col] {
+            '+' => {
+                let result = Operator('+').apply_from_vec(&numbers);
+                numbers.clear();
+                result
+            }
+            '*' => {
+                let result = Operator('*').apply_from_vec(&numbers);
+                numbers.clear();
+                result
+            }
+            _ => continue,
+        };
+        // dbg!(&result);
+    }
+    // dbg!(&result);
+    result
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    const TEST: &str = "123 328  51 64 
- 45 64  387 23 
-  6 98  215 314
-*   +   *   +  ";
+    const TEST: &str = "123 328  51 64 \n 45 64  387 23 \n  6 98  215 314\n*   +   *   +  \n";
+
+    const TEST_RIGHT_TO_LEFT_SHORT: &str = "4373\n3141\n858 \n78  \n+   \n";
 
     #[test]
     fn test_part1() {
@@ -91,6 +138,8 @@ mod tests {
 
     #[test]
     fn test_part2() {
-        todo!("Part 2 UT");
+        assert_eq!(Operator('+').apply_from_vec(&[10, 10, 10]), 30);
+        assert_eq!(part2(TEST_RIGHT_TO_LEFT_SHORT), 8324);
+        assert_eq!(part2(TEST), 3263827);
     }
 }
