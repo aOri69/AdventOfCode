@@ -1,24 +1,5 @@
 use std::collections::HashSet;
 
-enum Manifold {
-    Start,
-    Splitter,
-    Space,
-    Beam,
-}
-
-impl From<char> for Manifold {
-    fn from(value: char) -> Self {
-        match value {
-            '.' => Self::Space,
-            '^' => Self::Splitter,
-            'S' => Self::Start,
-            '|' => Self::Beam,
-            _ => unreachable!("Should not be on the map"),
-        }
-    }
-}
-
 pub fn part1(input: &str) -> usize {
     let mut splits_count = 0;
     let mut beams = HashSet::new();
